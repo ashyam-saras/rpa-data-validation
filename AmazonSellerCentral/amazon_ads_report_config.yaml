@@ -1,0 +1,287 @@
+amazon_ads_report_config:
+  Sponsored Products Search term report:
+    url: "https://advertising.amazon.com/reports/api/subscriptions/custom"
+    payload:
+      reportName: "Sponsored Products Search term report"
+      reportType: "searchTerms"
+      reportPeriod: "CUSTOM"
+      reportStartDate: "{start_date}"
+      reportEndDate: "{end_date}"
+      reportPeriodTimezone: "Asia/Calcutta"
+      subscriptionDelivery:
+        frequency: "SINGLE"
+      reportMetadata:
+        reportCategoryId: "sp"
+        reportTypeId: "searchTerms"
+        templateId: null
+        templateGuidance: null
+        timeUnitId: "day"
+      filterTypes: ["fenix", "advertiserId", "marketplaceId", "adProductTypeCode"]
+      recipients: null
+      reportCategory: "sp"
+      timeUnit: "day"
+      currencyOfVisualization: null
+      columns: ["day_timestamp", "portfolio_name", "campaign_budget_currency", "campaign_name", "ad_name", "targeting", "keyword_type", "search_term", "impressions", "clicks", "ctr", "cpc", "total_cost", "total_sales_from_clicks_7d", "total_acos_from_clicks_7d", "total_roas_from_clicks_7d", "purchase_click_count_7d", "total_units_sold_from_clicks_7d", "purchase_click_rate_7d", "same_sku_units_sold_from_clicks_7d", "other_sku_units_sold_from_clicks_7d", "same_sku_sales_from_clicks_7d", "other_sku_sales_from_clicks_7d"]
+      marketplaceIds: ["ATVPDKIKX0DER"]
+      translationsMap:
+        day_timestamp: "Date"
+        portfolio_name: "Portfolio name"
+        campaign_budget_currency: "Currency"
+        campaign_name: "Campaign Name"
+        ad_name: "Ad Group Name"
+        targeting: "Targeting"
+        keyword_type: "Match Type"
+        search_term: "Customer Search Term"
+        impressions: "Impressions"
+        clicks: "Clicks"
+        ctr: "Click-Thru Rate (CTR)"
+        cpc: "Cost Per Click (CPC)"
+        total_cost: "Spend"
+        total_sales_from_clicks_7d: "7 Day Total Sales"
+        total_acos_from_clicks_7d: "Total Advertising Cost of Sales (ACOS)"
+        total_roas_from_clicks_7d: "Total Return on Advertising Spend (ROAS)"
+        purchase_click_count_7d: "7 Day Total Orders (#)"
+        total_units_sold_from_clicks_7d: "7 Day Total Units (#)"
+        purchase_click_rate_7d: "7 Day Conversion Rate"
+        same_sku_units_sold_from_clicks_7d: "7 Day Advertised SKU Units (#)"
+        other_sku_units_sold_from_clicks_7d: "7 Day Other SKU Units (#)"
+        same_sku_sales_from_clicks_7d: "7 Day Advertised SKU Sales"
+        other_sku_sales_from_clicks_7d: "7 Day Other SKU Sales"
+    params:
+      entityId: "ENTITYK52N69ABC6OY"
+    folder_name: "sponsored_products_search_term"
+    file_prefix: "SponsoredProductsSearchTerm"
+    retry_wait_time: 30
+
+  Sponsored Display Targeting report:
+    url: "https://advertising.amazon.com/reports/api/subscriptions"
+    payload:
+      reportName: "Sponsored Display Targeting report"
+      reportType: "keywords"
+      reportPeriod: "CUSTOM"
+      reportStartDate: "{start_date}"
+      reportEndDate: "{end_date}"
+      reportPeriodTimezone: "Asia/Calcutta"
+      subscriptionDelivery:
+        frequency: "SINGLE"
+      reportMetadata:
+        reportCategoryId: "sd"
+        reportTypeId: "keywords"
+        templateId: "tresahKeywordsTemplate"
+        templateGuidance: "APPROVED"
+        timeUnitId: "day"
+      filterTypes: ["fenix", "advertiserId", "marketplaceId", "adProductTypeCode"]
+      recipients: null
+      taktReportType: "Targeting"
+      reportProgramType: "sd"
+      reportUnit: "day"
+    params:
+      entityId: "ENTITYK52N69ABC6OY"
+    folder_name: "sponsored_display_targeting"
+    file_prefix: "SponsoredDisplayTargeting"
+    retry_wait_time: 30
+
+  Sponsored Brands Search term report:
+    url: "https://advertising.amazon.com/reports/api/subscriptions"
+    payload:
+      reportName: "Sponsored Brands Search term report"
+      reportType: "searchTerms"
+      reportPeriod: "CUSTOM"
+      reportStartDate: "{start_date}"
+      reportEndDate: "{end_date}"
+      reportPeriodTimezone: "Asia/Calcutta"
+      subscriptionDelivery:
+        frequency: "SINGLE"
+      reportMetadata:
+        reportCategoryId: "hsa"
+        reportTypeId: "searchTerms"
+        templateId: "tresahUnifiedSearchTermsTemplate"
+        templateGuidance: "APPROVED"
+        timeUnitId: "day"
+      filterTypes: ["fenix", "advertiserId", "marketplaceId", "advertiserCfid"]
+      recipients: null
+      taktReportType: "Search term"
+      reportProgramType: "hsa"
+      reportUnit: "day"
+    params:
+      entityId: "ENTITYK52N69ABC6OY"
+    folder_name: "sponsored_brands_search_term"
+    file_prefix: "SponsoredBrandsSearchTerm"
+    retry_wait_time: 30
+
+  Sponsored Products Advertised product report:
+    url: "https://advertising.amazon.com/reports/api/subscriptions/custom"
+    payload:
+      reportName: "Sponsored Products Advertised product report"
+      reportType: "adProducts"
+      reportPeriod: "CUSTOM"
+      reportStartDate: "{start_date}"
+      reportEndDate: "{end_date}"
+      reportPeriodTimezone: "Asia/Calcutta"
+      subscriptionDelivery:
+        frequency: "SINGLE"
+      reportMetadata:
+        reportCategoryId: "sp"
+        reportTypeId: "adProducts"
+        templateId: null
+        templateGuidance: null
+        timeUnitId: "day"
+      filterTypes: ["fenix", "advertiserId", "marketplaceId", "adProductTypeCode"]
+      recipients: null
+      reportCategory: "sp"
+      timeUnit: "day"
+      currencyOfVisualization: null
+      columns: ["day_timestamp", "portfolio_name", "campaign_budget_currency", "campaign_name", "ad_name", "ad_creative_sku", "retailer_offer_id", "impressions", "clicks", "ctr", "cpc", "total_cost", "total_sales_from_clicks_7d", "total_acos_from_clicks_7d", "total_roas_from_clicks_7d", "purchase_click_count_7d", "total_units_sold_from_clicks_7d", "purchase_click_rate_7d", "same_sku_units_sold_from_clicks_7d", "other_sku_units_sold_from_clicks_7d", "same_sku_sales_from_clicks_7d", "other_sku_sales_from_clicks_7d"]
+      marketplaceIds: ["ATVPDKIKX0DER"]
+      translationsMap:
+        day_timestamp: "Date"
+        portfolio_name: "Portfolio name"
+        campaign_budget_currency: "Currency"
+        campaign_name: "Campaign Name"
+        ad_name: "Ad Group Name"
+        ad_creative_sku: "Advertised SKU"
+        retailer_offer_id: "Advertised ASIN"
+        impressions: "Impressions"
+        clicks: "Clicks"
+        ctr: "Click-Thru Rate (CTR)"
+        cpc: "Cost Per Click (CPC)"
+        total_cost: "Spend"
+        total_sales_from_clicks_7d: "7 Day Total Sales"
+        total_acos_from_clicks_7d: "Total Advertising Cost of Sales (ACOS)"
+        total_roas_from_clicks_7d: "Total Return on Advertising Spend (ROAS)"
+        purchase_click_count_7d: "7 Day Total Orders (#)"
+        total_units_sold_from_clicks_7d: "7 Day Total Units (#)"
+        purchase_click_rate_7d: "7 Day Conversion Rate"
+        same_sku_units_sold_from_clicks_7d: "7 Day Advertised SKU Units (#)"
+        other_sku_units_sold_from_clicks_7d: "7 Day Other SKU Units (#)"
+        same_sku_sales_from_clicks_7d: "7 Day Advertised SKU Sales"
+        other_sku_sales_from_clicks_7d: "7 Day Other SKU Sales"
+    params:
+      entityId: "ENTITYK52N69ABC6OY"
+    folder_name: "sponsored_products_ads_product"
+    file_prefix: "SponsoredProductsAdvertisedProduct"
+    retry_wait_time: 30
+
+  Sponsored Display Advertised product report:
+    url: "https://advertising.amazon.com/reports/api/subscriptions"
+    payload:
+      reportName: "Sponsored Display Advertised product report"
+      reportType: "adProducts"
+      reportPeriod: "CUSTOM"
+      reportStartDate: "{start_date}"
+      reportEndDate: "{end_date}"
+      reportPeriodTimezone: "Asia/Calcutta"
+      subscriptionDelivery:
+        frequency: "SINGLE"
+      reportMetadata:
+        reportCategoryId: "sd"
+        reportTypeId: "adProducts"
+        templateId: "tresahAdsTemplate"
+        templateGuidance: "APPROVED"
+        timeUnitId: "day"
+      filterTypes: ["fenix", "advertiserId", "marketplaceId", "adProductTypeCode"]
+      recipients: null
+      taktReportType: "Advertised product"
+      reportProgramType: "sd"
+      reportUnit: "day"
+    params:
+      entityId: "ENTITYK52N69ABC6OY"
+    folder_name: "sponsored_display_ads_product"
+    file_prefix: "SponsoredDisplayAdvertisedProduct"
+    retry_wait_time: 30
+
+  Sponsored Brands Campaign report:
+    url: "https://advertising.amazon.com/reports/api/subscriptions/custom"
+    payload:
+      reportName: "Sponsored Brands Campaign report"
+      reportType: "campaigns"
+      reportPeriod: "CUSTOM"
+      reportStartDate: "{start_date}"
+      reportEndDate: "{end_date}"
+      reportPeriodTimezone: "Asia/Calcutta"
+      subscriptionDelivery:
+        frequency: "SINGLE"
+      reportMetadata:
+        reportCategoryId: "hsa"
+        reportTypeId: "campaigns"
+        templateId: null
+        templateGuidance: null
+        timeUnitId: "day"
+      filterTypes: ["marketplaceIds"]
+      recipients: null
+      reportCategory: "hsa"
+      timeUnit: "day"
+      currencyOfVisualization: "USD"
+      columns: ["date", "portfolioName", "currencyOfView", "campaignBudgetCurrencyCode", "campaignName", "costType", "marketplaceId", "impressions", "clicks", "clickThroughRate", "costPerClickCoV", "costPerClick", "spendCoV", "spend", "totalAcos14d", "totalRoas14d", "totalSales14dCoV", "totalSales14d", "purchaseCount14d", "totalUnitsSold14d", "purchaseClickRate14d", "viewableImpressions", "vcpm", "vtr", "vctr", "richMediaEvent68Count", "richMediaEvent70Count", "richMediaEvent78Count", "richMediaEvent66Count", "richMediaEvent79Count", "richMediaEvent8193Count", "video5SecondViewRate", "brandSearchCount14d", "totalDpvCount14d", "newToBrandPurchases", "newToBrandPurchasesPercentage", "newToBrandSalesCoV", "newToBrandSales", "newToBrandSalesPercentage", "newToBrandUnitsSold", "newToBrandUnitsSoldPercentage", "newToBrandPurchasesRate", "acosClicks14d", "roasClicks14d", "sales14dCoV", "sales14d", "purchases14d", "unitsSoldClicks14d", "newToBrandDetailPageViews", "newToBrandDetailPageViewClicks", "newToBrandDetailPageViewRate", "newToBrandECPDetailPageViewCoV", "newToBrandECPDetailPageView", "addToCart", "addToCartClicks", "addToCartRate", "eCPAddToCartCoV", "eCPAddToCart", "brandedSearchesClicks", "brandedSearchRate", "eCPBrandSearchCoV", "eCPBrandSearch", "longTermSalesCoV", "longTermSales", "longTermROAS"]
+      marketplaceIds: ["ATVPDKIKX0DER"]
+      translationsMap:
+        date: "Date"
+        portfolioName: "portfolioName"
+        currencyOfView: "Currency - converted"
+        campaignBudgetCurrencyCode: "Currency - not converted"
+        campaignName: "Campaign Name"
+        costType: "costType"
+        marketplaceId: "marketplaceId"
+        impressions: "Impressions"
+        clicks: "Clicks"
+        clickThroughRate: "clickThroughRate"
+        costPerClickCoV: "costPerClickCoV"
+        costPerClick: "costPerClick"
+        spendCoV: "Spend - converted"
+        spend: "Spend"
+        totalAcos14d: "totalAcos14d"
+        totalRoas14d: "totalRoas14d"
+        totalSales14dCoV: "totalSales14dCoV"
+        totalSales14d: "totalSales14d"
+        purchaseCount14d: "purchaseCount14d"
+        totalUnitsSold14d: "totalUnitsSold14d"
+        purchaseClickRate14d: "purchaseClickRate14d"
+        viewableImpressions: "viewableImpressions"
+        vcpm: "Cost per 1,000 viewable impressions (VCPM)"
+        vtr: "View-Through Rate (VTR)"
+        vctr: "Click-Through Rate for Views (vCTR)"
+        richMediaEvent68Count: "richMediaEvent68Count"
+        richMediaEvent70Count: "richMediaEvent70Count"
+        richMediaEvent78Count: "richMediaEvent78Count"
+        richMediaEvent66Count: "richMediaEvent66Count"
+        richMediaEvent79Count: "richMediaEvent79Count"
+        richMediaEvent8193Count: "richMediaEvent8193Count"
+        video5SecondViewRate: "video5SecondViewRate"
+        brandSearchCount14d: "brandSearchCount14d"
+        totalDpvCount14d: "totalDpvCount14d"
+        newToBrandPurchases: "newToBrandPurchases"
+        newToBrandPurchasesPercentage: "newToBrandPurchasesPercentage"
+        newToBrandSalesCoV: "newToBrandSalesCoV"
+        newToBrandSales: "newToBrandSales"
+        newToBrandSalesPercentage: "newToBrandSalesPercentage"
+        newToBrandUnitsSold: "newToBrandUnitsSold"
+        newToBrandUnitsSoldPercentage: "newToBrandUnitsSoldPercentage"
+        newToBrandPurchasesRate: "newToBrandPurchasesRate"
+        acosClicks14d: "acosClicks14d"
+        roasClicks14d: "roasClicks14d"
+        sales14dCoV: "14 Day Total Sales - converted"
+        sales14d: "14 Day Total Sales - not converted"
+        purchases14d: "purchases14d"
+        unitsSoldClicks14d: "unitsSoldClicks14d"
+        newToBrandDetailPageViews: "newToBrandDetailPageViews"
+        newToBrandDetailPageViewClicks: "newToBrandDetailPageViewClicks"
+        newToBrandDetailPageViewRate: "newToBrandDetailPageViewRate"
+        newToBrandECPDetailPageViewCoV: "newToBrandECPDetailPageViewCoV"
+        newToBrandECPDetailPageView: "newToBrandECPDetailPageView"
+        addToCart: "addToCart"
+        addToCartClicks: "addToCartClicks"
+        addToCartRate: "addToCartRate"
+        eCPAddToCartCoV: "eCPAddToCartCoV"
+        eCPAddToCart: "eCPAddToCart"
+        brandedSearchesClicks: "brandedSearchesClicks"
+        brandedSearchRate: "brandedSearchRate"
+        eCPBrandSearchCoV: "eCPBrandSearchCoV"
+        eCPBrandSearch: "eCPBrandSearch"
+        longTermSalesCoV: "longTermSalesCoV"
+        longTermSales: "longTermSales"
+        longTermROAS: "longTermROAS"
+    params:
+      entityId: "ENTITYK52N69ABC6OY"
+    folder_name: "sponsored_brand_campaign"
+    file_prefix: "SponsoredBrandsCampaign"
+    retry_wait_time: 900

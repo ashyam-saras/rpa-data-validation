@@ -4,11 +4,7 @@ import requests
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 from pathlib import Path
 from auth import login_and_get_cookie
-from io import StringIO
-import pandas as pd
-import json
-from utils import parse_args, upload_to_gcs, save_content_to_file
-import argparse
+from utils import parse_args, save_content_to_file
 from logger import logger
 
 STORAGE_STATE_PATH = Path(__file__).parent / "data" / "sales_traffic"
@@ -16,7 +12,6 @@ BASE_URL = "https://sellercentral.amazon.com/business-reports/api"
 
 
 def validate_parameters(report_start_date: str, report_end_date: str):
-
     """
     Validate the date parameters for the report.
 
@@ -34,11 +29,11 @@ def validate_parameters(report_start_date: str, report_end_date: str):
         start_date = datetime.strptime(report_start_date, "%Y-%m-%d")
         end_date = datetime.strptime(report_end_date, "%Y-%m-%d")
         if end_date < start_date:
-                raise ValueError("End date cannot be earlier than start date")
+            raise ValueError("End date cannot be earlier than start date")
     except ValueError as e:
         logger.error(f"Error Validating date: {str(e)}")
         raise e
-    
+
 
 def request_sales_traffic_report(report_start_date: str, report_end_date: str, cookie: dict, granularity: str = "DAY"):
     """
@@ -61,7 +56,7 @@ def request_sales_traffic_report(report_start_date: str, report_end_date: str, c
     logger.info("Requesting report download URL...")
 
     url = "https://sellercentral.amazon.com/business-reports/api"
-    
+
     payload = {
         "operationName": "reportDataDownloadQuery",
         "variables": {
@@ -99,8 +94,8 @@ def request_sales_traffic_report(report_start_date: str, report_end_date: str, c
                     "SC_MA_ClaimsAmount_25986",
                     "SC_MA_ShippedProductSales_0002",
                     "SC_MA_UnitsShipped_0001",
-                    "SC_MA_OrdersShipped_0001"
-                ]
+                    "SC_MA_OrdersShipped_0001",
+                ],
             }
         },
         "query": """
@@ -110,28 +105,27 @@ def request_sales_traffic_report(report_start_date: str, report_end_date: str, c
                     __typename
                 }
             }
-        """
+        """,
     }
 
     try:
-        response = requests.post(
-            url=url,
-            json=payload,
-            cookies=cookie
-        )
+        response = requests.post(url=url, json=payload, cookies=cookie)
         response.raise_for_status()
-        
+
         json_response = response.json()
-        download_url = json_response.get('data', {}).get('getReportDataDownload', {}).get('url')
-        
+        download_url = json_response.get("data", {}).get("getReportDataDownload", {}).get("url")
+
         logger.info(f"Download URL fetched: {download_url}")
         return download_url
-    
+
     except requests.exceptions.RequestException as e:
         logger.error(f"Error making request for Sales Traffic download url: {e}")
         return None
 
-def download_and_save_report(download_url: str, report_start_date: str, report_end_date: str, cookie: dict, output_file: str):
+
+def download_and_save_report(
+    download_url: str, report_start_date: str, report_end_date: str, cookie: dict, output_file: str
+):
     """
     Download and save the sales traffic report locally.
 
@@ -151,37 +145,27 @@ def download_and_save_report(download_url: str, report_start_date: str, report_e
     """
     try:
         logger.info("Download URL obtained, started downloading...")
-        response = requests.get(
-            url=download_url,
-            cookies=cookie
-        )
+        response = requests.get(url=download_url, cookies=cookie)
         response.raise_for_status()
 
         logger.info(f"Report downloaded successfully, started saving")
-        
-        file_path = save_content_to_file(
-            content=response.content,
-            folder_name="sales_traffic",
-            file_name=output_file
-        )
-            
+
+        csv_data = response.content
+        return csv_data
+
         return file_path
     except requests.exceptions.RequestException as e:
         logger.error(f"Error downloading report: {e}")
         return None
-    
-    
-@retry(
-    stop=stop_after_attempt(10),
-    wait=wait_fixed(10),
-    retry=retry_if_result(lambda result: result is None)
-)
+
+
+@retry(stop=stop_after_attempt(10), wait=wait_fixed(10), retry=retry_if_result(lambda result: result is None))
 def download_sales_traffic_report(
     report_start_date: str,
     report_end_date: str,
     client: str = "nexusbrand",
     brandname: str = "ExplodingKittens",
-    bucket_name: str = "rpa_validation_bucket"
+    bucket_name: str = "rpa_validation_bucket",
 ) -> None:
     """
     Download sales and traffic report from Amazon Seller Central and upload to Google Cloud Storage.
@@ -206,12 +190,10 @@ def download_sales_traffic_report(
 
         validate_parameters(report_start_date, report_end_date)
 
-        cookie = login_and_get_cookie()
+        cookie, headers = login_and_get_cookie()
 
         download_url = request_sales_traffic_report(
-            report_start_date=report_start_date,
-            report_end_date=report_end_date,
-            cookie=cookie
+            report_start_date=report_start_date, report_end_date=report_end_date, cookie=cookie
         )
 
         if download_url:
@@ -219,20 +201,22 @@ def download_sales_traffic_report(
             end_date_formatted = datetime.strptime(report_end_date, "%Y-%m-%d").strftime("%Y%m%d")
             output_file = f"SalesAndTraffic_{brandname}_{start_date_formatted}_{end_date_formatted}.csv"
 
-            file_path = download_and_save_report(
+            csv_data = download_and_save_report(
                 download_url=download_url,
                 report_start_date=report_start_date,
                 report_end_date=report_end_date,
                 cookie=cookie,
-                output_file=output_file
+                output_file=output_file,
             )
 
+            file_path = save_content_to_file(content=csv_data, folder_name="sales_traffic", file_name=output_file)
+
             if file_path:
-            # Extract year and month from end_date  
+                # Extract year and month from end_date
                 end_date_obj = datetime.strptime(report_end_date, "%Y-%m-%d")
                 year = end_date_obj.strftime("%Y")
                 month = end_date_obj.strftime("%m")
-            
+
                 destination_blob_name = f"UIReport/AmazonSellingPartner/{client}/{brandname}/SalesAndTraffic/year={year}/month={month}/{output_file}"
                 # upload_to_gcs(local_file_name=output_file, local_folder_name="sales_traffic", bucket_name=bucket_name, destination_blob_name=destination_blob_name)
             else:
@@ -241,23 +225,24 @@ def download_sales_traffic_report(
         else:
             logger.error("Failed to get download URL")
             return None
-        
+
         return destination_blob_name
-            
+
     except Exception as e:
         logger.error("Some Error occurred while downloading: ")
         raise e
 
+
 if __name__ == "__main__":
     args = parse_args(
-        description='Download Sales and Traffic Report from Amazon Seller Central',
-        date_format='YYYY-MM-DD',
-        optional_args=True
+        description="Download Sales and Traffic Report from Amazon Seller Central",
+        date_format="YYYY-MM-DD",
+        optional_args=True,
     )
     download_sales_traffic_report(
         report_start_date=args.start_date,
         report_end_date=args.end_date,
         client=args.client,
         brandname=args.brandname,
-        bucket_name=args.bucket_name
+        bucket_name=args.bucket_name,
     )
