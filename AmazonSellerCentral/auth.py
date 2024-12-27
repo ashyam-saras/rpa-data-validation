@@ -43,7 +43,9 @@ def take_screenshot(page: Page, prefix: str) -> Path:
 def log_retry_attempt(retry_state: RetryCallState) -> None:
     """Log retry attempt number"""
     if retry_state.attempt_number > 0:
-        logger.info(f"Retry attempt {retry_state.attempt_number} of {retry_state.retry_object.stop.max_attempt_number}")
+        logger.info(
+            f"Retry attempt {retry_state.attempt_number} of {retry_state.retry_object.stop.max_attempt_number}"
+        )
 
 
 def handle_2FA(page: Page, otp_secret: str) -> None:
@@ -52,7 +54,7 @@ def handle_2FA(page: Page, otp_secret: str) -> None:
     # Handle 2FA
     logger.info("Handling 2FA...")
     totp = pyotp.TOTP(otp_secret)
-    otp  = totp.now()
+    otp = totp.now()
     page.get_by_label("Enter OTP:").fill(otp)
     page.get_by_label("Sign in").click()
 
@@ -88,6 +90,7 @@ def login_and_get_cookie(
     password: str = "N3xusBrandGroup",
     otp_secret: str = "N3J6EI2PTTKMALRPUMXIZNQHW3U3LZAV32YSXOBPHYKLC4CL3GWA",
     headless: bool = False,
+    amazon_ads: bool = False,
 ) -> str:
     """Login to Amazon and get session cookie"""
     logger.info("Logging in to Amazon...")
@@ -96,9 +99,12 @@ def login_and_get_cookie(
         browser, context = setup_browser(p, headless)
         page = context.new_page()
 
+        headers = {}
+        csrf_token = None
+
         try:
 
-            #navigate to amazon seller central
+            # navigate to amazon seller central
 
             page.goto("https://sellercentral.amazon.com/")
             page.wait_for_load_state("networkidle")
@@ -111,34 +117,34 @@ def login_and_get_cookie(
                 page.get_by_label("Password").click()
                 page.get_by_label("Password").fill(password)
                 page.get_by_label("Sign in").click()
-                
-                handle_2FA(page=page, otp_secret = otp_secret)
-                
+
+                handle_2FA(page=page, otp_secret=otp_secret)
+
                 page.get_by_role("button", name="United States").click()
                 page.get_by_role("button", name="Select account").click()
 
-                #####test###
-                page.get_by_label("Navigation menu").click()
+            else:
+                logger.info("Already logged in, skipping login.")
 
-                csrf_token = None
+            if amazon_ads:
+                page.get_by_label("Navigation menu").click()
+                page.wait_for_load_state("networkidle")
 
                 def handle_request(request):
+                    nonlocal headers
                     nonlocal csrf_token
                     if csrf_token is None and "anti-csrftoken-a2z" in request.headers:
                         csrf_token = request.headers["anti-csrftoken-a2z"]
-                        print(f"Found CSRF token: {csrf_token}")
+                        logger.info(f"Found CSRF token: {csrf_token}")
+                        headers["anti-csrftoken-a2z"] = csrf_token
 
                 # Listen to all requests
                 page.on("requestfinished", handle_request)
 
+                page.locator("#sc-navbar-container").get_by_text("Reports", exact=True).click()
                 page.get_by_role("link", name="Advertising Reports External").click()
                 page.get_by_label("Sponsored ads reports", exact=True).click()
                 page.wait_for_load_state("networkidle")
-
-            
-            else:
-                logger.info("Already logged in, skipping login.")
-
 
             # Collect session cookies
             logger.info("Collecting session cookies...")
@@ -146,7 +152,7 @@ def login_and_get_cookie(
 
             # Get all cookies and filter for Metabase ones
             all_cookies = context.cookies()
-            cookie = {cookie['name']: cookie['value'] for cookie in all_cookies}
+            cookie = {cookie["name"]: cookie["value"] for cookie in all_cookies}
 
             # Cleanup
             if SCREENSHOT_DIR.exists():
@@ -154,8 +160,8 @@ def login_and_get_cookie(
 
             # Save browser state
             context.storage_state(path=STORAGE_STATE_PATH)
-            
-            return cookie
+
+            return cookie, headers
 
         except Exception as e:
             logger.error(f"\n=== ERROR ===\nURL: {page.url}\nError: {str(e)}")
@@ -168,10 +174,11 @@ def login_and_get_cookie(
 
 
 if __name__ == "__main__":
-    cookie = login_and_get_cookie(
+    cookie, headers = login_and_get_cookie(
         username="REDACTED_EMAIL",
         password="N3xusBrandGroup",
         otp_secret="N3J6EI2PTTKMALRPUMXIZNQHW3U3LZAV32YSXOBPHYKLC4CL3GWA",
         headless=False,
+        amazon_ads=True,
     )
     # print(cookie)
