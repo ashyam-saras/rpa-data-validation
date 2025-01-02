@@ -169,7 +169,7 @@ def check_report_status(requested_report_id: str, cookie: dict, headers: dict, r
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(5), retry=retry_if_result(lambda result: result is None))
-def dowload_report(report_download_url: str):
+def download_report_data(report_download_url: str):
     """
     Download the report from the given URL.
 
@@ -250,7 +250,7 @@ def download_actual_report(
                 end_date_formatted = datetime.strptime(report_end_date, "%Y/%m/%d").strftime("%Y%m%d")
 
                 output_file = f"{file_prefix}_{brandname}_{start_date_formatted}_{end_date_formatted}.csv"
-                csv_data = dowload_report(report_download_url)
+                csv_data = download_report_data(report_download_url)
                 file_path = save_content_to_file(content=csv_data, folder_name=folder_name, file_name=output_file)
 
                 if file_path:

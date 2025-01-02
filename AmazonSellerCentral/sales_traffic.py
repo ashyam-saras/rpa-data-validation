@@ -123,7 +123,7 @@ def request_sales_traffic_report(report_start_date: str, report_end_date: str, c
         return None
 
 
-def download_and_save_report(
+def download_report_data(
     download_url: str, report_start_date: str, report_end_date: str, cookie: dict, output_file: str
 ):
     """
@@ -153,7 +153,6 @@ def download_and_save_report(
         csv_data = response.content
         return csv_data
 
-        return file_path
     except requests.exceptions.RequestException as e:
         logger.error(f"Error downloading report: {e}")
         return None
@@ -201,7 +200,7 @@ def download_sales_traffic_report(
             end_date_formatted = datetime.strptime(report_end_date, "%Y-%m-%d").strftime("%Y%m%d")
             output_file = f"SalesAndTraffic_{brandname}_{start_date_formatted}_{end_date_formatted}.csv"
 
-            csv_data = download_and_save_report(
+            csv_data = download_report_data(
                 download_url=download_url,
                 report_start_date=report_start_date,
                 report_end_date=report_end_date,
