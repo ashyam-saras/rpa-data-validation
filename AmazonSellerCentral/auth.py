@@ -89,7 +89,7 @@ def login_and_get_cookie(
     username: str = "REDACTED_EMAIL",
     password: str = "REDACTED_PASS",
     otp_secret: str = "REDACTED_KEY",
-    headless: bool = False,
+    headless: bool = True,
     amazon_ads: bool = False,
 ) -> str:
     """Login to Amazon and get session cookie"""
@@ -150,7 +150,7 @@ def login_and_get_cookie(
             logger.info("Collecting session cookies...")
             page.wait_for_timeout(10000)
 
-            # Get all cookies and filter for Metabase ones
+            # Get all cookies
             all_cookies = context.cookies()
             cookie = {cookie["name"]: cookie["value"] for cookie in all_cookies}
 
@@ -181,4 +181,3 @@ if __name__ == "__main__":
         headless=False,
         amazon_ads=True,
     )
-    # print(cookie)

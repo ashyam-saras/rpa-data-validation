@@ -98,7 +98,7 @@ def request_report(
         cookies=cookie,
     )
 
-    logger.log(f" Response Status: {response.status_code}")
+    # logger.log(f" Response Status: {response.status_code}")
     json_data = response.json()
 
     report_reference_id = json_data.get("reportReferenceId")
@@ -134,7 +134,7 @@ def check_download_status(cookie: dict, report_reference_id: str):
     return status
 
 
-def download_ready_report(cookie: dict, report_reference_id: str, file_format: str):
+def download_report_data(cookie: dict, report_reference_id: str, file_format: str):
     """
     Download a ready report from Amazon Seller Central.
 
@@ -239,7 +239,7 @@ def download_filfillments_report(
                 logger.error("Maximum retry reached. Report can not be downloaded")
                 return
 
-        status_code, data = download_ready_report(
+        status_code, data = download_report_data(
             cookie=cookie, report_reference_id=report_reference_id, file_format=reportFileFormat
         )
 
