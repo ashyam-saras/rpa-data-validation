@@ -5,14 +5,16 @@ from utils import parse_args, save_content_to_file
 from auth import login_and_get_cookie
 from logger import logger
 
+BASE_URL = "https://sellercentral.amazon.com/payments/reports/api"
+
 
 def validate_parameters(report_start_date: str, report_end_date: str):
     """
     Validate the date parameters for the report.
 
     Args:
-        report_start_date: Start date in YYYY-MM-DD format
-        report_end_date: End date in YYYY-MM-DD format
+        report_start_date (str): Start date in YYYY-MM-DD format
+        report_end_date (str): End date in YYYY-MM-DD format
 
     Raises:
         ValueError: If dates are in invalid format or if end_date is earlier than start_date
@@ -31,7 +33,18 @@ def validate_parameters(report_start_date: str, report_end_date: str):
 
 
 def request_report(cookie: dict, report_start_date: str, report_end_date: str) -> str:
-    url = "https://sellercentral.amazon.com/payments/reports/api/request-report"
+    """
+    Request a report from Amazon Seller Central.
+
+    Args:
+        cookie (dict): Authentication cookie
+        report_start_date (str): Start date in YYYY/MM/DD format
+        report_end_date (str): End date in YYYY/MM/DD format
+
+    Returns:
+        str: Report reference ID and report status
+    """
+    url = BASE_URL + "/request-report"
 
     start_date_timestamp = int((datetime.strptime(report_start_date, "%Y/%m/%d").timestamp()) * 1000)
     end_date_timestamp = int((datetime.strptime(report_end_date, "%Y/%m/%d").timestamp()) * 1000)
@@ -72,7 +85,17 @@ def request_report(cookie: dict, report_start_date: str, report_end_date: str) -
     retry=retry_if_result(lambda result: result is None or result != "DOWNLOADABLE"),
 )
 def check_download_status(cookie: dict, report_reference_id: str) -> dict:
-    url = f"https://sellercentral.amazon.com/payments/reports/api/report"
+    """
+    Check the download status of the requested report.
+
+    Args:
+        cookie (dict): Authentication cookie
+        report_reference_id (str): Report reference ID
+
+    Returns:
+        dict: Report status
+    """
+    url = BASE_URL + "/report"
     params = {"reportId": report_reference_id}
 
     try:
@@ -89,7 +112,17 @@ def check_download_status(cookie: dict, report_reference_id: str) -> dict:
 
 
 def download_report_data(cookie: dict, report_reference_id: str) -> str:
-    url = f"https://sellercentral.amazon.com/payments/reports/api/download-report"
+    """
+    Download the report data from Amazon Seller Central.
+
+    Args:
+        cookie (dict): Authentication cookie
+        report_reference_id (str): Report reference ID
+
+    Returns:
+        str: HTTP status code and report content
+    """
+    url = BASE_URL + "/download-report"
     params = {"reportId": report_reference_id}
 
     try:
@@ -116,11 +149,11 @@ def download_transaction_report(
     Download all orders report from Amazon Seller Central and upload to Google Cloud Storage.
 
     Args:
-        report_start_date: Start date in YYYY/MM/DD format
-        report_end_date: End date in YYYY/MM/DD format
-        client: Client name for GCS path organization (default: "nexusbrand")
-        brandname: Brand name for filename and GCS path (default: "ExplodingKittens")
-        bucket_name: Google Cloud Storage bucket name (default: "rpa_validation_bucket")
+        report_start_date (str): Start date in YYYY/MM/DD format
+        report_end_date (str): End date in YYYY/MM/DD format
+        client (str): Client name for GCS path organization (default: "nexusbrand")
+        brandname (str): Brand name for filename and GCS path (default: "ExplodingKittens")
+        bucket_name (str): Google Cloud Storage bucket name (default: "rpa_validation_bucket")
 
     Raises:
         ValueError: If date parameters are invalid
