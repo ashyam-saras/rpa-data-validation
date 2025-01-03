@@ -1,6 +1,5 @@
 fulfillment_reports_config:
   All Orders:
-    date_required: true
     params:
       reportFileFormat: "TSV"
       reportStartDate: "{start_date}"
@@ -14,7 +13,6 @@ fulfillment_reports_config:
     file_prefix: "AllOrders"
   
   FBA Customer Returns:
-    date_required: true
     params:
       reportFileFormat: "CSV"
       reportStartDate: "{start_date}"
@@ -28,11 +26,8 @@ fulfillment_reports_config:
     file_prefix: "FBACustomerReturns"
 
   FBA Inventory:
-    date_required: false
     params:
       reportFileFormat: "CSV"
-      reportStartDate: "{start_date}"
-      reportEndDate: "{end_date}"
       xdaysBeforeUntilToday: 0
       reportFRPId: "19600"
       startDateTimeOffset: 0
