@@ -1,14 +1,18 @@
 from datetime import datetime
+from pathlib import Path
 import requests
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 from auth import login_and_get_cookie
 from io import StringIO
 import pandas as pd
-from utils import save_content_to_file, parse_args
+from utils import save_content_to_file, parse_args, upload_to_gcs
 from logger import logger
 import yaml
 
 BASE_URL = "https://sellercentral.amazon.com/reportcentral/api/v1"
+CONFIG_FILE_PATH = Path(__file__).parent / "fulfillment_all_reports_config.yaml"
+with open(CONFIG_FILE_PATH, "r") as file:
+    config = yaml.safe_load(file)
 
 
 def load_report_from_yaml(report_name: str, start_date: str = None, end_date: str = None) -> dict:
@@ -23,13 +27,10 @@ def load_report_from_yaml(report_name: str, start_date: str = None, end_date: st
     Returns:
         dict: Configuration details for the specified report
     """
-    config_file_path = r"D:\rpa-data-validation\AmazonSellerCentral\fulfillment_all_reports_config.yaml"
-    with open(config_file_path, "r") as file:
-        config = yaml.safe_load(file)
 
     report_config = config["fulfillment_reports_config"].get(report_name, {})
 
-    if report_config.get("date_required", False):
+    if "reportStartDate" in report_config.get("params", {}) and "reportEndDate" in report_config.get("params", {}):
         if start_date:
             report_config["params"]["reportStartDate"] = start_date
         if end_date:
@@ -69,15 +70,15 @@ def validate_parameters(report_start_date: str, report_end_date: str):
 def request_report(
     cookie: dict,
     params: dict,
+    headers: dict,
 ) -> str:
     """
-    Request an All Orders report from Amazon Seller Central.
+    Request an report from Amazon Seller Central.
 
     Args:
         cookie: Configured session cookie dict
-        report_start_date: Start date in YYYY/MM/DD format
-        report_end_date: End date in YYYY/MM/DD format
-        xdaysBeforeUntilToday: Number of days before today to include in the report
+        params: Parameters for the report request
+        headers: Headers for the request
 
     Returns:
         tuple: A tuple containing (report_reference_id, report_status)
@@ -87,24 +88,35 @@ def request_report(
     Raises:
         requests.exceptions.RequestException: If the request to Amazon fails
     """
+    try:
+        logger.info("Requesting report...")
 
-    logger.info("Requesting AllOrders report...")
+        url = BASE_URL + "/submitDownloadReport"
 
-    url = BASE_URL + "/submitDownloadReport"
+        response = requests.post(
+            url=url,
+            params=params,
+            cookies=cookie,
+            headers=headers,
+        )
 
-    response = requests.post(
-        url=url,
-        params=params,
-        cookies=cookie,
-    )
+        logger.info(f" Response Status: {response.status_code}")
+        response.raise_for_status()
 
-    # logger.log(f" Response Status: {response.status_code}")
-    json_data = response.json()
+        if response.status_code == 200:
+            json_data = response.json()
 
-    report_reference_id = json_data.get("reportReferenceId")
-    report_status = json_data.get("reportStatus")
+            report_reference_id = json_data.get("reportReferenceId")
+            report_status = json_data.get("reportStatus")
 
-    return report_reference_id, report_status
+            return report_reference_id, report_status
+        else:
+            logger.error(f"Failed to request report. Status code: {response.status_code}")
+            return None, None
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request failed: {e}")
+        return None, None
 
 
 @retry(
@@ -122,16 +134,22 @@ def check_download_status(cookie: dict, report_reference_id: str):
 
     Returns:
         str: Status of the report ('Done', 'InQueue', 'InProgress', etc.)
+        None: If the request to Amazon fails
     """
+    try:
+        status_url = BASE_URL + "/getDownloadReportStatus"
+        response = requests.get(url=status_url, params=[("referenceIds", report_reference_id)], cookies=cookie)
+        response.raise_for_status()
+        json_data = response.json()
+        status = json_data[0] if json_data else None
 
-    status_url = BASE_URL + "/getDownloadReportStatus"
-    response = requests.get(url=status_url, params=[("referenceIds", report_reference_id)], cookies=cookie)
-    json_data = response.json()
-    status = json_data[0] if json_data else None
+        logger.info(f"Executed Check Download status function. Status: {status}")
 
-    logger.info(f"Executed Check Download status function. Status: {status}")
+        return status
 
-    return status
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request failed: {e}")
+        return None
 
 
 def download_report_data(cookie: dict, report_reference_id: str, file_format: str):
@@ -148,7 +166,7 @@ def download_report_data(cookie: dict, report_reference_id: str, file_format: st
         None: If the download fails
     """
 
-    logger.info("Downloading AllOrders report...")
+    logger.info("Downloading report...")
     try:
         download_url = BASE_URL + "/downloadFile"
         response = requests.get(
@@ -167,13 +185,12 @@ def download_report_data(cookie: dict, report_reference_id: str, file_format: st
     return response.status_code, report_content
 
 
-def convert_tsv_to_csv(tsv_data: bytes, output_file: str = None) -> None:
+def convert_tsv_to_csv(tsv_data: bytes) -> None:
     """
     Convert TSV data to CSV format and save to file.
 
     Args:
         tsv_data: String containing TSV formatted data
-        output_file: Path to save the output CSV file
 
     Raises:
         Exception: If there's an error during conversion or file saving
@@ -208,11 +225,15 @@ def download_filfillments_report(
     bucket_name: str = "rpa_validation_bucket",
 ):
     """
-    Download all orders report from Amazon Seller Central and upload to Google Cloud Storage.
+    Download report from Amazon Seller Central and upload to Google Cloud Storage.
 
     Args:
         report_start_date: Start date in YYYY/MM/DD format
         report_end_date: End date in YYYY/MM/DD format
+        reportFileFormat: Format of the report file
+        params: Parameters for the report request
+        folder_name: Folder name to save the report
+        file_prefix: Prefix for the output file
         client: Client name for GCS path organization (default: "nexusbrand")
         brandname: Brand name for filename and GCS path (default: "ExplodingKittens")
         bucket_name: Google Cloud Storage bucket name (default: "rpa_validation_bucket")
@@ -226,9 +247,9 @@ def download_filfillments_report(
 
         validate_parameters(report_start_date, report_end_date)
 
-        cookie, headers = login_and_get_cookie()
+        cookie, headers = login_and_get_cookie(amazon_fulfillment=True)
 
-        report_reference_id, report_status = request_report(cookie=cookie, params=params)
+        report_reference_id, report_status = request_report(cookie=cookie, params=params, headers=headers)
 
         logger.info(f"Report Reference ID: {report_reference_id}    Report Status: {report_status}")
 
@@ -250,7 +271,7 @@ def download_filfillments_report(
 
             output_file = f"{file_prefix}_{brandname}_{start_date_formatted}_{end_date_formatted}.csv"
             if reportFileFormat == "TSV":
-                data = convert_tsv_to_csv(tsv_data=data, output_file=output_file)
+                data = convert_tsv_to_csv(tsv_data=data)
 
             # Save using the utility function
             file_path = save_content_to_file(content=data, folder_name=folder_name, file_name=output_file)
@@ -258,7 +279,12 @@ def download_filfillments_report(
             # Extract year and month from report_end_date
             end_date = datetime.strptime(report_end_date, "%Y/%m/%d")
             destination_blob_name = f"UIReport/AmazonSellingPartner/{client}/{brandname}/{file_prefix}/year={end_date.strftime('%Y')}/month={end_date.strftime('%m')}/{output_file}"
-            # upload_to_gcs(local_file_name=output_file, local_folder_name="allorders", bucket_name=bucket_name, destination_blob_name=destination_blob_name)
+            upload_to_gcs(
+                local_file_name=output_file,
+                local_folder_name=folder_name,
+                bucket_name=bucket_name,
+                destination_blob_name=destination_blob_name,
+            )
 
     except Exception as e:
         logger.error("Some Error ocurred while downloading")
@@ -282,7 +308,6 @@ if __name__ == "__main__":
             report_name=report_name, start_date=args.start_date, end_date=args.end_date
         )
 
-        date_required = report_config.get("date_required")
         params = report_config.get("params")
         folder_name = report_config.get("folder_name")
         file_prefix = report_config.get("file_prefix")

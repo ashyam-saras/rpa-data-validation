@@ -91,6 +91,7 @@ def login_and_get_cookie(
     otp_secret: str = "REDACTED_KEY",
     headless: bool = True,
     amazon_ads: bool = False,
+    amazon_fulfillment: bool = False,
 ) -> str:
     """Login to Amazon and get session cookie"""
     logger.info("Logging in to Amazon...")
@@ -144,6 +145,27 @@ def login_and_get_cookie(
                 page.locator("#sc-navbar-container").get_by_text("Reports", exact=True).click()
                 page.get_by_role("link", name="Advertising Reports External").click()
                 page.get_by_label("Sponsored ads reports", exact=True).click()
+                page.wait_for_load_state("networkidle")
+
+            if amazon_fulfillment:
+                page.get_by_label("Navigation menu").click()
+                page.wait_for_load_state("networkidle")
+
+                def handle_request(request):
+                    nonlocal headers
+                    nonlocal csrf_token
+                    if csrf_token is None and "anti-csrftoken-a2z" in request.headers:
+                        csrf_token = request.headers["anti-csrftoken-a2z"]
+                        logger.info(f"Found CSRF token: {csrf_token}")
+                        headers["anti-csrftoken-a2z"] = csrf_token
+
+                # Listen to all requests
+                page.on("requestfinished", handle_request)
+
+                page.locator("#sc-navbar-container").get_by_text("Reports", exact=True).click()
+                page.get_by_role("link", name="Fulfillment Remove page from").click()
+                page.get_by_text("Show more...").nth(1).click()
+                page.locator("#report-central-nav").get_by_role("link", name="All Orders").click()
                 page.wait_for_load_state("networkidle")
 
             # Collect session cookies
