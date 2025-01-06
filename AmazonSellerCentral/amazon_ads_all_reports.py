@@ -1,3 +1,4 @@
+from pathlib import Path
 import requests
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 import pandas as pd
@@ -8,12 +9,15 @@ from datetime import datetime
 from logger import logger
 import yaml
 
+CONFIG_FILE_PATH = Path(__file__).parent / "amazon_ads_report_config.yaml"
+with open(CONFIG_FILE_PATH, "r") as file:
+    config = yaml.safe_load(file)
+
 
 def load_report_from_yaml(
     report_name: str,
     report_start_date: str,
     report_end_date: str,
-    yaml_file_path: str = r"D:\rpa-data-validation\AmazonSellerCentral\amazon_ads_report_config.yaml",
 ):
     """
     Load report configuration from a YAML file and update the start and end dates.
@@ -22,13 +26,10 @@ def load_report_from_yaml(
         report_name: Name of the report to load.
         report_start_date: Start date in YYYY/MM/DD format.
         report_end_date: End date in YYYY/MM/DD format.
-        yaml_file_path: Path to the YAML configuration file.
 
     Returns:
         A dictionary containing the report configuration, or None if the report is not found.
     """
-    with open(yaml_file_path, "r") as file:
-        config = yaml.safe_load(file)
 
     start_date_timestamp = int((datetime.strptime(report_start_date, "%Y/%m/%d").timestamp()) * 1000)
     end_date_timestamp = int((datetime.strptime(report_end_date, "%Y/%m/%d").timestamp()) * 1000)
