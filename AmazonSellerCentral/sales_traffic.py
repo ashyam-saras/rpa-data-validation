@@ -1,13 +1,14 @@
-from datetime import datetime
+import sys
 from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from datetime import datetime
 import requests
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
-from pathlib import Path
 from auth import login_and_get_cookie
-from utils import parse_args, save_content_to_file
-from logger import logger
+from helper.utils import save_content_to_file, parse_args, upload_to_gcs
+from helper.logger import logger
 
-STORAGE_STATE_PATH = Path(__file__).parent / "data" / "sales_traffic"
 BASE_URL = "https://sellercentral.amazon.com/business-reports/api"
 
 
@@ -217,7 +218,12 @@ def download_sales_traffic_report(
                 month = end_date_obj.strftime("%m")
 
                 destination_blob_name = f"UIReport/AmazonSellingPartner/{client}/{brandname}/SalesAndTraffic/year={year}/month={month}/{output_file}"
-                # upload_to_gcs(local_file_name=output_file, local_folder_name="sales_traffic", bucket_name=bucket_name, destination_blob_name=destination_blob_name)
+                upload_to_gcs(
+                    local_file_name=output_file,
+                    local_folder_name="sales_traffic",
+                    bucket_name=bucket_name,
+                    destination_blob_name=destination_blob_name,
+                )
             else:
                 logger.error("Failed to download report")
                 return None

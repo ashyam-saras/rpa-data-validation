@@ -1,15 +1,18 @@
+import sys
 from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 import requests
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 import pandas as pd
 from io import BytesIO
-from utils import parse_args, save_content_to_file
+from helper.utils import parse_args, save_content_to_file, upload_to_gcs
+from helper.logger import logger
 from auth import login_and_get_cookie
 from datetime import datetime
-from logger import logger
 import yaml
 
-CONFIG_FILE_PATH = Path(__file__).parent / "amazon_ads_report_config.yaml"
+CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "amazon_ads_report_config.yaml"
 with open(CONFIG_FILE_PATH, "r") as file:
     config = yaml.safe_load(file)
 
@@ -261,12 +264,12 @@ def download_actual_report(
                     month = end_date_obj.strftime("%m")
 
                     destination_blob_name = f"UIReport/AmazonSellingPartner/{client}/{brandname}/{file_prefix}/year={year}/month={month}/{output_file}"
-                    # upload_to_gcs(
-                    #     local_file_name=output_file,
-                    #     local_folder_name=folder_name,
-                    #     bucket_name=bucket_name,
-                    #     destination_blob_name=destination_blob_name,
-                    # )
+                    upload_to_gcs(
+                        local_file_name=output_file,
+                        local_folder_name=folder_name,
+                        bucket_name=bucket_name,
+                        destination_blob_name=destination_blob_name,
+                    )
                 else:
                     logger.error("Failed to download report")
                     return None
