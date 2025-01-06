@@ -1,10 +1,10 @@
 from google.cloud import storage
 from pathlib import Path
 import argparse
-from logger import logger
+from helper.logger import logger
 
-STORAGE_STATE_PATH = Path(__file__).parent / "data"
-SERVICE_ACCOUNT_PATH = Path(__file__).parent / "solutionsdw_rpa_data_validation_bot.json"
+STORAGE_STATE_PATH = Path(__file__).parent.parent / "data"
+SERVICE_ACCOUNT_PATH = Path(__file__).parent.parent / "solutionsdw_rpa_data_validation_bot.json"
 
 
 def save_content_to_file(content: bytes, folder_name: str, file_name: str) -> Path:

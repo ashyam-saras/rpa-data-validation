@@ -1,16 +1,19 @@
-from datetime import datetime
+import sys
 from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from datetime import datetime
 import requests
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 from auth import login_and_get_cookie
 from io import StringIO
 import pandas as pd
-from utils import save_content_to_file, parse_args, upload_to_gcs
-from logger import logger
+from helper.utils import save_content_to_file, parse_args, upload_to_gcs
+from helper.logger import logger
 import yaml
 
 BASE_URL = "https://sellercentral.amazon.com/reportcentral/api/v1"
-CONFIG_FILE_PATH = Path(__file__).parent / "fulfillment_all_reports_config.yaml"
+CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "fulfillment_all_reports_config.yaml"
 with open(CONFIG_FILE_PATH, "r") as file:
     config = yaml.safe_load(file)
 

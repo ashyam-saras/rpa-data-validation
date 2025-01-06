@@ -1,9 +1,13 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 import requests
 from datetime import datetime
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
-from utils import parse_args, save_content_to_file
+from helper.utils import save_content_to_file, parse_args, upload_to_gcs
+from helper.logger import logger
 from auth import login_and_get_cookie
-from logger import logger
 
 BASE_URL = "https://sellercentral.amazon.com/payments/reports/api"
 
@@ -146,7 +150,7 @@ def download_transaction_report(
     bucket_name: str = "rpa_validation_bucket",
 ):
     """
-    Download all orders report from Amazon Seller Central and upload to Google Cloud Storage.
+    Download payment Transaction report from Amazon Seller Central and upload to Google Cloud Storage.
 
     Args:
         report_start_date (str): Start date in YYYY/MM/DD format
@@ -193,7 +197,12 @@ def download_transaction_report(
             # Extract year and month from report_end_date
             end_date = datetime.strptime(report_end_date, "%Y/%m/%d")
             destination_blob_name = f"UIReport/AmazonSellingPartner/{client}/{brandname}/PaymentTransaction/year={end_date.strftime('%Y')}/month={end_date.strftime('%m')}/{output_file}"
-            # upload_to_gcs(local_file_name=output_file, local_folder_name="allorders", bucket_name=bucket_name, destination_blob_name=destination_blob_name)
+            upload_to_gcs(
+                local_file_name=output_file,
+                local_folder_name="payment_transaction",
+                bucket_name=bucket_name,
+                destination_blob_name=destination_blob_name,
+            )
 
     except Exception as e:
         logger.error("Some Error ocurred while downloading")
