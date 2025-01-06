@@ -1,7 +1,7 @@
 from google.cloud import storage
 from pathlib import Path
 import argparse
-from helper.logger import logger
+from helper.logging import logger
 
 STORAGE_STATE_PATH = Path(__file__).parent.parent / "data"
 SERVICE_ACCOUNT_PATH = Path(__file__).parent.parent / "solutionsdw_rpa_data_validation_bot.json"

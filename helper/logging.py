@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 import sys
 
 # Set up logging
@@ -12,8 +13,10 @@ formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", datef
 stream_handler = logging.StreamHandler(sys.stdout)
 stream_handler.setFormatter(formatter)
 
+
 # file handler to write log messages text file
-file_handler = logging.FileHandler("logfile.txt")
+log_file = Path(__file__).parent.parent / "logfile.txt"
+file_handler = logging.FileHandler(log_file)
 file_handler.setFormatter(formatter)
 
 # Add both handlers to the logger

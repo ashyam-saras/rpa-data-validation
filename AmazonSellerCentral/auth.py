@@ -4,7 +4,7 @@ from pathlib import Path
 import pyotp
 from playwright.sync_api import Page, Playwright, sync_playwright
 from tenacity import RetryCallState, retry, retry_if_exception_type, stop_after_attempt, wait_fixed
-from helper.logger import logger
+from helper.logging import logger
 
 # Constants
 

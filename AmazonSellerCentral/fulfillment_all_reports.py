@@ -9,7 +9,7 @@ from auth import login_and_get_cookie
 from io import StringIO
 import pandas as pd
 from helper.utils import save_content_to_file, parse_args, upload_to_gcs
-from helper.logger import logger
+from helper.logging import logger
 import yaml
 
 BASE_URL = "https://sellercentral.amazon.com/reportcentral/api/v1"

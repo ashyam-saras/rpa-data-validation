@@ -7,7 +7,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 import pandas as pd
 from io import BytesIO
 from helper.utils import parse_args, save_content_to_file, upload_to_gcs
-from helper.logger import logger
+from helper.logging import logger
 from auth import login_and_get_cookie
 from datetime import datetime
 import yaml

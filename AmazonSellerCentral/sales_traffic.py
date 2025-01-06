@@ -7,7 +7,7 @@ import requests
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 from auth import login_and_get_cookie
 from helper.utils import save_content_to_file, parse_args, upload_to_gcs
-from helper.logger import logger
+from helper.logging import logger
 
 BASE_URL = "https://sellercentral.amazon.com/business-reports/api"
 
