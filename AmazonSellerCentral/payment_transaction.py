@@ -6,7 +6,7 @@ import requests
 from datetime import datetime
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 from helper.utils import save_content_to_file, parse_args, upload_to_gcs
-from helper.logger import logger
+from helper.logging import logger
 from auth import login_and_get_cookie
 
 BASE_URL = "https://sellercentral.amazon.com/payments/reports/api"
