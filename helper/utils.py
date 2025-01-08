@@ -7,33 +7,45 @@ STORAGE_STATE_PATH = Path(__file__).parent.parent / "data"
 SERVICE_ACCOUNT_PATH = Path(__file__).parent.parent / "solutionsdw_rpa_data_validation_bot.json"
 
 
-def save_content_to_file(content: bytes, folder_name: str, file_name: str) -> Path:
+def save_content_to_file(content: bytes, folder_name: str, file_name: str) -> str:
     """
-    Save content to a file in the specified folder.
+    Save content to a file, adding double quotes around CSV values if not already present.
 
     Args:
-        content: The content to save (in bytes)
-        folder_name: Name of the folder under data directory
-        file_name: Name of the file to save
+        content (bytes): The content to save.
+        folder_name (str): The folder to save the file in.
+        file_name (str): The name of the file.
 
     Returns:
-        Path: Path object pointing to the saved file
-
-    Raises:
-        Exception: If there's an error saving the file
+        str: The path to the saved file.
     """
+    # Ensure the folder exists
     try:
         file_path = STORAGE_STATE_PATH / folder_name / file_name
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(file_path, "wb") as f:
-            f.write(content)
+        # Convert bytes content to string, replacing invalid bytes
+        content_str = content.decode("utf-8", errors="replace")
 
-        logger.info(f"File saved successfully to: {file_path}")
-        return file_path
+        # Add double quotes around CSV values if not already present
+        lines = content_str.splitlines()
+        quoted_lines = []
+        for line in lines:
+            values = line.split(",")
+            quoted_values = [
+                f'"{value}"' if not (value.startswith('"') and value.endswith('"')) else value for value in values
+            ]
+            quoted_lines.append(",".join(quoted_values))
+        quoted_content = "\n".join(quoted_lines)
+
+        # Save the content to a file
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(quoted_content)
     except Exception as e:
         logger.error(f"Error saving file: {str(e)}")
         raise e
+
+    return file_path
 
 
 def upload_to_gcs(
