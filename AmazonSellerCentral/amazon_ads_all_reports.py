@@ -9,7 +9,7 @@ from io import BytesIO
 from helper.utils import parse_args, save_content_to_file, upload_to_gcs
 from helper.logging import logger
 from auth import login_and_get_cookie
-from datetime import datetime
+from datetime import datetime, timedelta
 import yaml
 
 CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "amazon_ads_report_config.yaml"
@@ -34,8 +34,15 @@ def load_report_from_yaml(
         A dictionary containing the report configuration, or None if the report is not found.
     """
 
-    start_date_timestamp = int((datetime.strptime(report_start_date, "%Y/%m/%d").timestamp()) * 1000)
-    end_date_timestamp = int((datetime.strptime(report_end_date, "%Y/%m/%d").timestamp()) * 1000)
+    start_date_timestamp = int(
+        (((datetime.strptime(report_start_date, "%Y/%m/%d")) + timedelta(hours=5, minutes=30)).timestamp()) * 1000
+    )
+    end_date_timestamp = int(
+        (((datetime.strptime(report_end_date, "%Y/%m/%d")) + timedelta(hours=5, minutes=30)).timestamp()) * 1000
+    )
+
+    logger.info(f"Report Start Date Timestamp: {start_date_timestamp}")
+    logger.info(f"Report End Date Timestamp: {end_date_timestamp}")
 
     report = config.get("amazon_ads_report_config", {}).get(report_name)
     if report:

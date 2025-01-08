@@ -50,13 +50,15 @@ def request_report(cookie: dict, report_start_date: str, report_end_date: str) -
     """
     url = BASE_URL + "/request-report"
 
-    start_date_timestamp = int((datetime.strptime(report_start_date, "%Y/%m/%d").timestamp()) * 1000)
-    end_date_timestamp = int((datetime.strptime(report_end_date, "%Y/%m/%d").timestamp()) * 1000)
-
     start_date_iso = datetime.strptime(report_start_date, "%Y/%m/%d").strftime("%Y-%m-%dT%H:%M:%S+05:30")
-    end_date_iso = datetime.strptime(report_end_date, "%Y/%m/%d").strftime("%Y-%m-%dT%H:%M:%S+05:30")
+    end_date_iso = (
+        datetime.strptime(report_end_date, "%Y/%m/%d")
+        .replace(hour=23, minute=59, second=59)
+        .strftime("%Y-%m-%dT%H:%M:%S+05:30")
+    )
 
-    print(start_date_timestamp, end_date_timestamp, start_date_iso, end_date_iso)
+    start_date_timestamp = int((datetime.strptime(report_start_date, "%Y/%m/%d").timestamp()) * 1000)
+    end_date_timestamp = int((datetime.strptime(end_date_iso, "%Y-%m-%dT%H:%M:%S+05:30").timestamp()) * 1000)
 
     data = {
         "accountType": "ALL",
