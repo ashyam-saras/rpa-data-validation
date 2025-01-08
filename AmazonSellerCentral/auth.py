@@ -24,6 +24,9 @@ WAIT_TIME = {
     "page_load": 30000,
 }
 
+csrf_token = None
+headers = {}
+
 
 class AmazonAuthError(Exception):
     """Custom exception for Amazon authentication errors"""
@@ -57,6 +60,15 @@ def handle_2FA(page: Page, otp_secret: str) -> None:
     otp = totp.now()
     page.get_by_label("Enter OTP:").fill(otp)
     page.get_by_label("Sign in").click()
+
+
+def handle_request(request):
+    global csrf_token
+    global headers
+    if csrf_token is None and "anti-csrftoken-a2z" in request.headers:
+        csrf_token = request.headers["anti-csrftoken-a2z"]
+        logger.info(f"Found CSRF token: {csrf_token}")
+        headers["anti-csrftoken-a2z"] = csrf_token
 
 
 def setup_browser(playwright: Playwright, headless: bool):
@@ -99,10 +111,8 @@ def login_and_get_cookie(
     with sync_playwright() as p:
         browser, context = setup_browser(p, headless)
         page = context.new_page()
-
-        headers = {}
-        csrf_token = None
-
+        global csrf_token
+        global headers
         try:
 
             # navigate to amazon seller central
@@ -131,14 +141,6 @@ def login_and_get_cookie(
                 page.get_by_label("Navigation menu").click()
                 page.wait_for_load_state("networkidle")
 
-                def handle_request(request):
-                    nonlocal headers
-                    nonlocal csrf_token
-                    if csrf_token is None and "anti-csrftoken-a2z" in request.headers:
-                        csrf_token = request.headers["anti-csrftoken-a2z"]
-                        logger.info(f"Found CSRF token: {csrf_token}")
-                        headers["anti-csrftoken-a2z"] = csrf_token
-
                 # Listen to all requests
                 page.on("requestfinished", handle_request)
 
@@ -150,14 +152,6 @@ def login_and_get_cookie(
             if amazon_fulfillment:
                 page.get_by_label("Navigation menu").click()
                 page.wait_for_load_state("networkidle")
-
-                def handle_request(request):
-                    nonlocal headers
-                    nonlocal csrf_token
-                    if csrf_token is None and "anti-csrftoken-a2z" in request.headers:
-                        csrf_token = request.headers["anti-csrftoken-a2z"]
-                        logger.info(f"Found CSRF token: {csrf_token}")
-                        headers["anti-csrftoken-a2z"] = csrf_token
 
                 # Listen to all requests
                 page.on("requestfinished", handle_request)
