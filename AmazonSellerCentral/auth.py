@@ -58,6 +58,7 @@ def handle_2FA(page: Page, otp_secret: str) -> None:
     logger.info("Handling 2FA...")
     totp = pyotp.TOTP(otp_secret)
     otp = totp.now()
+    print(f"OTP: {otp}")
     page.get_by_label("Enter OTP:").fill(otp)
     page.get_by_label("Sign in").click()
 
@@ -98,12 +99,14 @@ def setup_browser(playwright: Playwright, headless: bool):
     before_sleep=log_retry_attempt,
 )
 def login_and_get_cookie(
+    market_place: str = "United States",
     username: str = "REDACTED_EMAIL",
     password: str = "REDACTED_PASS",
     otp_secret: str = "REDACTED_KEY",
     headless: bool = True,
     amazon_ads: bool = False,
     amazon_fulfillment: bool = False,
+    context: Page = None,
 ) -> str:
     """Login to Amazon and get session cookie"""
     logger.info("Logging in to Amazon...")
@@ -115,6 +118,7 @@ def login_and_get_cookie(
         global headers
         try:
 
+            # context.clear_cookies()
             # navigate to amazon seller central
 
             page.goto("https://sellercentral.amazon.com/")
@@ -131,11 +135,29 @@ def login_and_get_cookie(
 
                 handle_2FA(page=page, otp_secret=otp_secret)
 
-                page.get_by_role("button", name="United States").click()
+                page.get_by_role("button", name=market_place).click()
                 page.get_by_role("button", name="Select account").click()
+
+                page.wait_for_load_state("networkidle")
+
+                if page.get_by_role("heading", name="Sign in", exact=True).count() > 0:
+                    page.get_by_label("Email or mobile phone number").click(modifiers=["ControlOrMeta"])
+                    page.get_by_label("Email or mobile phone number").fill(username)
+                    page.get_by_label("Continue").click()
+                    page.get_by_label("Password").click()
+                    page.get_by_label("Password").fill(password)
+                    page.get_by_label("Sign in").click()
+                    page.wait_for_timeout(30000)
+                    handle_2FA(page=page, otp_secret=otp_secret)
+                    page.wait_for_load_state("networkidle")
 
             else:
                 logger.info("Already logged in, skipping login.")
+                # if page.get_by_label("Select an account").is_visible():
+                if page.get_by_role("button", name="Select account", exact=True).is_visible():
+                    page.get_by_role("button", name=market_place).click()
+                    page.get_by_role("button", name="Select account").click()
+                    page.wait_for_load_state("networkidle")
 
             if amazon_ads:
                 page.get_by_label("Navigation menu").click()
@@ -157,7 +179,10 @@ def login_and_get_cookie(
                 page.on("requestfinished", handle_request)
 
                 page.locator("#sc-navbar-container").get_by_text("Reports", exact=True).click()
-                page.get_by_role("link", name="Fulfillment Remove page from").click()
+                if page.get_by_role("link", name="Fulfillment Remove page from").count() > 0:
+                    page.get_by_role("link", name="Fulfillment Remove page from").click()
+                elif page.get_by_role("link", name="Fulfilment by Amazon Remove").count() > 0:
+                    page.get_by_role("link", name="Fulfilment by Amazon Remove").click()
                 page.get_by_text("Show more...").nth(1).click()
                 page.locator("#report-central-nav").get_by_role("link", name="All Orders").click()
                 page.wait_for_load_state("networkidle")

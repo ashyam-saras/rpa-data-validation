@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -8,8 +9,16 @@ from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 from helper.utils import save_content_to_file, parse_args, upload_to_gcs
 from helper.logging import logger
 from auth import login_and_get_cookie
+import yaml
 
-BASE_URL = "https://sellercentral.amazon.com/payments/reports/api"
+STORAGE_STATE_PATH = Path(__file__).parent / "auth_state.json"
+
+MARKET_PLACE_CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "market_place_config.yaml"
+with open(MARKET_PLACE_CONFIG_FILE_PATH, "r") as file:
+    market_place_config = yaml.safe_load(file)
+marketplace_config = None
+
+BASE_URL = None
 
 
 def validate_parameters(report_start_date: str, report_end_date: str):
@@ -61,7 +70,7 @@ def request_report(cookie: dict, report_start_date: str, report_end_date: str) -
     end_date_timestamp = int((datetime.strptime(end_date_iso, "%Y-%m-%dT%H:%M:%S+05:30").timestamp()) * 1000)
 
     data = {
-        "accountType": "ALL",
+        "accountType": "PAYABLE",  # "ALL", we should pass All to get actual data but German account is not supporting it
         "reportType": "SELLER_TRANSACTION_DATE_RANGE",
         "startDate": start_date_timestamp,
         "startDateISO": start_date_iso,
@@ -147,6 +156,7 @@ def download_report_data(cookie: dict, report_reference_id: str) -> str:
 def download_transaction_report(
     report_start_date: str,
     report_end_date: str,
+    marketplace: str,
     client: str = "nexusbrand",
     brandname: str = "ExplodingKittens",
     bucket_name: str = "rpa_validation_bucket",
@@ -170,7 +180,7 @@ def download_transaction_report(
 
         validate_parameters(report_start_date, report_end_date)
 
-        cookie, headers = login_and_get_cookie()
+        cookie, headers = login_and_get_cookie(market_place=marketplace, headless=False)
 
         report_reference_id, report_status = request_report(
             cookie=cookie, report_start_date=report_start_date, report_end_date=report_end_date
@@ -218,8 +228,16 @@ if __name__ == "__main__":
         date_format="YYYY/MM/DD",
         optional_args=True,
     )
+    marketplace_config = market_place_config.get("marketplace_config", {}).get(args.market_place)
+    BASE_URL = f"https://sellercentral.amazon.{marketplace_config["url_domain"]}/payments/reports/api"
+
+    # Remove auth_state.json file to clear cookies
+    if STORAGE_STATE_PATH.exists():
+        print("Removing auth_state.json")
+        os.remove(STORAGE_STATE_PATH)
 
     download_transaction_report(
         report_start_date=args.start_date,
         report_end_date=args.end_date,
+        marketplace=args.market_place,
     )

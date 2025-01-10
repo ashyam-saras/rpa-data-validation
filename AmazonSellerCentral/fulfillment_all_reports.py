@@ -12,13 +12,19 @@ from helper.utils import save_content_to_file, parse_args, upload_to_gcs
 from helper.logging import logger
 import yaml
 
-BASE_URL = "https://sellercentral.amazon.com/reportcentral/api/v1"
 CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "fulfillment_all_reports_config.yaml"
 with open(CONFIG_FILE_PATH, "r") as file:
     config = yaml.safe_load(file)
 
+MARKET_PLACE_CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "market_place_config.yaml"
+with open(MARKET_PLACE_CONFIG_FILE_PATH, "r") as file:
+    market_place_config = yaml.safe_load(file)
+marketplace_config = None
 
-def load_report_from_yaml(report_name: str, start_date: str = None, end_date: str = None) -> dict:
+BASE_URL = None
+
+
+def load_report_from_yaml(report_name: str, market_place: str, start_date: str = None, end_date: str = None) -> dict:
     """
     Load configuration details from a YAML file based on the report name and replace start_date and end_date if provided.
 
@@ -30,6 +36,10 @@ def load_report_from_yaml(report_name: str, start_date: str = None, end_date: st
     Returns:
         dict: Configuration details for the specified report
     """
+    global BASE_URL
+    global marketplace_config
+    marketplace_config = market_place_config.get("marketplace_config", {}).get(market_place)
+    BASE_URL = f"https://sellercentral.amazon.{marketplace_config["url_domain"]}/reportcentral/api/v1"
 
     report_config = config["fulfillment_reports_config"].get(report_name, {})
 
@@ -223,6 +233,7 @@ def download_filfillments_report(
     params: dict,
     folder_name: str,
     file_prefix: str,
+    market_place: str,
     client: str = "nexusbrand",
     brandname: str = "ExplodingKittens",
     bucket_name: str = "rpa_validation_bucket",
@@ -250,7 +261,7 @@ def download_filfillments_report(
 
         validate_parameters(report_start_date, report_end_date)
 
-        cookie, headers = login_and_get_cookie(amazon_fulfillment=True)
+        cookie, headers = login_and_get_cookie(amazon_fulfillment=True, market_place=market_place, headless=False)
 
         report_reference_id, report_status = request_report(cookie=cookie, params=params, headers=headers)
 
@@ -308,7 +319,7 @@ if __name__ == "__main__":
 
         logger.info(f"GENERATING REPORT FOR {report_name}")
         report_config = load_report_from_yaml(
-            report_name=report_name, start_date=args.start_date, end_date=args.end_date
+            report_name=report_name, start_date=args.start_date, end_date=args.end_date, market_place=args.market_place
         )
 
         params = report_config.get("params")
@@ -326,4 +337,5 @@ if __name__ == "__main__":
             client=args.client,
             brandname=args.brandname,
             bucket_name=args.bucket_name,
+            market_place=args.market_place,
         )

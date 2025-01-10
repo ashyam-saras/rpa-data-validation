@@ -11,16 +11,25 @@ from helper.logging import logger
 from auth import login_and_get_cookie
 from datetime import datetime, timedelta
 import yaml
+import os
+
+STORAGE_STATE_PATH = Path(__file__).parent / "auth_state.json"
 
 CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "amazon_ads_report_config.yaml"
 with open(CONFIG_FILE_PATH, "r") as file:
     config = yaml.safe_load(file)
+
+MARKET_PLACE_CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "market_place_config.yaml"
+with open(MARKET_PLACE_CONFIG_FILE_PATH, "r") as file:
+    market_place_config = yaml.safe_load(file)
+marketplace_config = None
 
 
 def load_report_from_yaml(
     report_name: str,
     report_start_date: str,
     report_end_date: str,
+    market_place: str,
 ):
     """
     Load report configuration from a YAML file and update the start and end dates.
@@ -29,6 +38,7 @@ def load_report_from_yaml(
         report_name: Name of the report to load.
         report_start_date: Start date in YYYY/MM/DD format.
         report_end_date: End date in YYYY/MM/DD format.
+        market_place: Marketplace value to select the respective url domain and entity id.
 
     Returns:
         A dictionary containing the report configuration, or None if the report is not found.
@@ -45,9 +55,14 @@ def load_report_from_yaml(
     logger.info(f"Report End Date Timestamp: {end_date_timestamp}")
 
     report = config.get("amazon_ads_report_config", {}).get(report_name)
-    if report:
+    global marketplace_config
+    marketplace_config = market_place_config.get("marketplace_config", {}).get(market_place)
+
+    if report and marketplace_config:
         report["payload"]["reportStartDate"] = start_date_timestamp
         report["payload"]["reportEndDate"] = end_date_timestamp
+        report["url"] = report["url"].format(url_domain=marketplace_config["url_domain"])
+        report["params"]["entityId"] = marketplace_config["entityId"]
         return report
     return None
 
@@ -138,7 +153,7 @@ def check_report_status(requested_report_id: str, cookie: dict, headers: dict, r
         try:
             logger.info("Checking report Status")
 
-            url = "https://advertising.amazon.com/reports/api/subscriptions?entityId=ENTITYK52N69ABC6OY"
+            url = f"https://advertising.amazon.{marketplace_config["url_domain"]}/reports/api/subscriptions?entityId={marketplace_config["entityId"]}"
 
             payload = {
                 "filters": [
@@ -215,6 +230,8 @@ def download_actual_report(
     file_prefix: str,
     folder_name: str,
     retry_wait_time: int,
+    cookie: dict,
+    headers: dict,
     client: str = "nexusbrand",
     brandname: str = "ExplodingKittens",
     bucket_name: str = "rpa_validation_bucket",
@@ -244,8 +261,6 @@ def download_actual_report(
     """
     try:
         validate_parameters(report_start_date, report_end_date)
-
-        cookie, headers = login_and_get_cookie(amazon_ads=True)
 
         report_status, requested_report_id = request_report(
             url=url, params=params, payload=payload, cookie=cookie, headers=headers
@@ -306,11 +321,22 @@ if __name__ == "__main__":
 
     report_list = args.report_list.split(",")
 
+    # Remove auth_state.json file to clear cookies
+    if STORAGE_STATE_PATH.exists():
+        print("Removing auth_state.json")
+        os.remove(STORAGE_STATE_PATH)
+
+    cookie, headers = login_and_get_cookie(amazon_ads=True, market_place=args.market_place, headless=False)
+
     for report_name in report_list:
 
         logger.info(f"GENERATING REPORT FOR {report_name}")
+
         report_config = load_report_from_yaml(
-            report_name=report_name, report_start_date=args.start_date, report_end_date=args.end_date
+            report_name=report_name,
+            report_start_date=args.start_date,
+            report_end_date=args.end_date,
+            market_place=args.market_place,
         )
 
         url = report_config.get("url")
@@ -332,4 +358,6 @@ if __name__ == "__main__":
             client=args.client,
             brandname=args.brandname,
             bucket_name=args.bucket_name,
+            cookie=cookie,
+            headers=headers,
         )

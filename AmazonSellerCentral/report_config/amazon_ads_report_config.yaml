@@ -1,6 +1,6 @@
 amazon_ads_report_config:
   Sponsored Products Search term report:
-    url: "https://advertising.amazon.com/reports/api/subscriptions/custom"
+    url: "https://advertising.amazon.{url_domain}/reports/api/subscriptions/custom"
     payload:
       reportName: "Sponsored Products Search term report"
       reportType: "searchTerms"
@@ -48,13 +48,13 @@ amazon_ads_report_config:
         same_sku_sales_from_clicks_7d: "7 Day Advertised SKU Sales"
         other_sku_sales_from_clicks_7d: "7 Day Other SKU Sales"
     params:
-      entityId: "ENTITYK52N69ABC6OY"
+      entityId: "{entityId}"
     folder_name: "sponsored_products_search_term"
     file_prefix: "SponsoredProductsSearchTerm"
     retry_wait_time: 30
 
   Sponsored Display Targeting report:
-    url: "https://advertising.amazon.com/reports/api/subscriptions"
+    url: "https://advertising.amazon.{url_domain}/reports/api/subscriptions"
     payload:
       reportName: "Sponsored Display Targeting report"
       reportType: "keywords"
@@ -76,13 +76,13 @@ amazon_ads_report_config:
       reportProgramType: "sd"
       reportUnit: "day"
     params:
-      entityId: "ENTITYK52N69ABC6OY"
+      entityId: "{entityId}"
     folder_name: "sponsored_display_targeting"
     file_prefix: "SponsoredDisplayTargeting"
     retry_wait_time: 30
 
   Sponsored Brands Search term report:
-    url: "https://advertising.amazon.com/reports/api/subscriptions"
+    url: "https://advertising.amazon.{url_domain}/reports/api/subscriptions"
     payload:
       reportName: "Sponsored Brands Search term report"
       reportType: "searchTerms"
@@ -104,13 +104,13 @@ amazon_ads_report_config:
       reportProgramType: "hsa"
       reportUnit: "day"
     params:
-      entityId: "ENTITYK52N69ABC6OY"
+      entityId: "{entityId}"
     folder_name: "sponsored_brands_search_term"
     file_prefix: "SponsoredBrandsSearchTerm"
     retry_wait_time: 30
 
   Sponsored Products Advertised product report:
-    url: "https://advertising.amazon.com/reports/api/subscriptions/custom"
+    url: "https://advertising.amazon.{url_domain}/reports/api/subscriptions/custom"
     payload:
       reportName: "Sponsored Products Advertised product report"
       reportType: "adProducts"
@@ -157,13 +157,13 @@ amazon_ads_report_config:
         same_sku_sales_from_clicks_7d: "7 Day Advertised SKU Sales"
         other_sku_sales_from_clicks_7d: "7 Day Other SKU Sales"
     params:
-      entityId: "ENTITYK52N69ABC6OY"
+      entityId: "{entityId}"
     folder_name: "sponsored_products_ads_product"
     file_prefix: "SponsoredProductsAdvertisedProduct"
     retry_wait_time: 30
 
   Sponsored Display Advertised product report:
-    url: "https://advertising.amazon.com/reports/api/subscriptions"
+    url: "https://advertising.amazon.{url_domain}/reports/api/subscriptions"
     payload:
       reportName: "Sponsored Display Advertised product report"
       reportType: "adProducts"
@@ -185,13 +185,13 @@ amazon_ads_report_config:
       reportProgramType: "sd"
       reportUnit: "day"
     params:
-      entityId: "ENTITYK52N69ABC6OY"
+      entityId: "{entityId}"
     folder_name: "sponsored_display_ads_product"
     file_prefix: "SponsoredDisplayAdvertisedProduct"
     retry_wait_time: 30
 
   Sponsored Brands Campaign report:
-    url: "https://advertising.amazon.com/reports/api/subscriptions/custom"
+    url: "https://advertising.amazon.{url_domain}/reports/api/subscriptions/custom"
     payload:
       reportName: "Sponsored Brands Campaign report"
       reportType: "campaigns"
@@ -281,7 +281,7 @@ amazon_ads_report_config:
         longTermSales: "longTermSales"
         longTermROAS: "longTermROAS"
     params:
-      entityId: "ENTITYK52N69ABC6OY"
+      entityId: "{entityId}"
     folder_name: "sponsored_brand_campaign"
     file_prefix: "SponsoredBrandsCampaign"
     retry_wait_time: 900
