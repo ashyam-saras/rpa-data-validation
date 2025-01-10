@@ -99,10 +99,10 @@ def setup_browser(playwright: Playwright, headless: bool):
     before_sleep=log_retry_attempt,
 )
 def login_and_get_cookie(
-    market_place: str = "United States",
-    username: str = "REDACTED_EMAIL",
-    password: str = "REDACTED_PASS",
-    otp_secret: str = "REDACTED_KEY",
+    market_place: str,
+    username: str,
+    password: str,
+    otp_secret: str,
     headless: bool = True,
     amazon_ads: bool = False,
     amazon_fulfillment: bool = False,
