@@ -128,6 +128,12 @@ def parse_args(
             default="rpa_validation_bucket",
             help="(Optional) GCS bucket name (default: rpa_validation_bucket)",
         )
+        parser.add_argument(
+            "--market_place",
+            type=str,
+            default="United States",
+            help="(Optional) Market Place Name (default: United States)",
+        )
 
     if amazon_ads or amazon_fulfillment:
         parser.add_argument(

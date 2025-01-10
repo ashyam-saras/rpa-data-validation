@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -8,8 +9,16 @@ from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 from auth import login_and_get_cookie
 from helper.utils import save_content_to_file, parse_args, upload_to_gcs
 from helper.logging import logger
+import yaml
 
-BASE_URL = "https://sellercentral.amazon.com/business-reports/api"
+STORAGE_STATE_PATH = Path(__file__).parent / "auth_state.json"
+
+MARKET_PLACE_CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "market_place_config.yaml"
+with open(MARKET_PLACE_CONFIG_FILE_PATH, "r") as file:
+    market_place_config = yaml.safe_load(file)
+marketplace_config = None
+
+BASE_URL = None
 
 
 def validate_parameters(report_start_date: str, report_end_date: str):
@@ -56,7 +65,7 @@ def request_sales_traffic_report(report_start_date: str, report_end_date: str, c
 
     logger.info("Requesting report download URL...")
 
-    url = "https://sellercentral.amazon.com/business-reports/api"
+    url = BASE_URL
 
     payload = {
         "operationName": "reportDataDownloadQuery",
@@ -163,6 +172,7 @@ def download_report_data(
 def download_sales_traffic_report(
     report_start_date: str,
     report_end_date: str,
+    market_place: str,
     client: str = "nexusbrand",
     brandname: str = "ExplodingKittens",
     bucket_name: str = "rpa_validation_bucket",
@@ -190,7 +200,7 @@ def download_sales_traffic_report(
 
         validate_parameters(report_start_date, report_end_date)
 
-        cookie, headers = login_and_get_cookie()
+        cookie, headers = login_and_get_cookie(market_place=market_place, headless=False)
 
         download_url = request_sales_traffic_report(
             report_start_date=report_start_date, report_end_date=report_end_date, cookie=cookie
@@ -244,10 +254,20 @@ if __name__ == "__main__":
         date_format="YYYY-MM-DD",
         optional_args=True,
     )
+
+    marketplace_config = market_place_config.get("marketplace_config", {}).get(args.market_place)
+    BASE_URL = f"https://sellercentral.amazon.{marketplace_config["url_domain"]}/business-reports/api"
+
+    # Remove auth_state.json file to clear cookies
+    if STORAGE_STATE_PATH.exists():
+        print("Removing auth_state.json")
+        os.remove(STORAGE_STATE_PATH)
+
     download_sales_traffic_report(
         report_start_date=args.start_date,
         report_end_date=args.end_date,
         client=args.client,
         brandname=args.brandname,
         bucket_name=args.bucket_name,
+        market_place=args.market_place,
     )
