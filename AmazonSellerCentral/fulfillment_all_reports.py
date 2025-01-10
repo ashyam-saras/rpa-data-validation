@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -11,6 +12,8 @@ import pandas as pd
 from helper.utils import save_content_to_file, parse_args, upload_to_gcs
 from helper.logging import logger
 import yaml
+
+STORAGE_STATE_PATH = Path(__file__).parent / "auth_state.json"
 
 CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "fulfillment_all_reports_config.yaml"
 with open(CONFIG_FILE_PATH, "r") as file:
@@ -233,7 +236,8 @@ def download_filfillments_report(
     params: dict,
     folder_name: str,
     file_prefix: str,
-    market_place: str,
+    cookie: dict,
+    headers: dict,
     client: str = "nexusbrand",
     brandname: str = "ExplodingKittens",
     bucket_name: str = "rpa_validation_bucket",
@@ -260,8 +264,6 @@ def download_filfillments_report(
     try:
 
         validate_parameters(report_start_date, report_end_date)
-
-        cookie, headers = login_and_get_cookie(amazon_fulfillment=True, market_place=market_place, headless=False)
 
         report_reference_id, report_status = request_report(cookie=cookie, params=params, headers=headers)
 
@@ -315,6 +317,20 @@ if __name__ == "__main__":
 
     report_list = args.report_list.split(",")
 
+    # Remove auth_state.json file to clear cookies
+    if STORAGE_STATE_PATH.exists():
+        print("Removing auth_state.json")
+        os.remove(STORAGE_STATE_PATH)
+
+    cookie, headers = login_and_get_cookie(
+        amazon_fulfillment=True,
+        market_place=args.market_place,
+        headless=False,
+        username="REDACTED_EMAIL",
+        password="REDACTED_PASS",
+        otp_secret="REDACTED_KEY",
+    )
+
     for report_name in report_list:
 
         logger.info(f"GENERATING REPORT FOR {report_name}")
@@ -337,5 +353,6 @@ if __name__ == "__main__":
             client=args.client,
             brandname=args.brandname,
             bucket_name=args.bucket_name,
-            market_place=args.market_place,
+            cookie=cookie,
+            headers=headers,
         )
