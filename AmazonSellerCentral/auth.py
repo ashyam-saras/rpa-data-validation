@@ -118,7 +118,6 @@ def login_and_get_cookie(
         global headers
         try:
 
-            # context.clear_cookies()
             # navigate to amazon seller central
 
             page.goto("https://sellercentral.amazon.com/")
@@ -137,8 +136,7 @@ def login_and_get_cookie(
 
                 page.get_by_role("button", name=market_place).click()
                 page.get_by_role("button", name="Select account").click()
-
-                page.wait_for_load_state("networkidle")
+                page.wait_for_timeout(8000)
 
                 if page.get_by_role("heading", name="Sign in", exact=True).count() > 0:
                     page.get_by_label("Email or mobile phone number").click(modifiers=["ControlOrMeta"])
@@ -149,31 +147,26 @@ def login_and_get_cookie(
                     page.get_by_label("Sign in").click()
                     page.wait_for_timeout(30000)
                     handle_2FA(page=page, otp_secret=otp_secret)
-                    page.wait_for_load_state("networkidle")
 
             else:
                 logger.info("Already logged in, skipping login.")
-                # if page.get_by_label("Select an account").is_visible():
                 if page.get_by_role("button", name="Select account", exact=True).is_visible():
                     page.get_by_role("button", name=market_place).click()
                     page.get_by_role("button", name="Select account").click()
-                    page.wait_for_load_state("networkidle")
 
             if amazon_ads:
                 page.get_by_label("Navigation menu").click()
-                page.wait_for_load_state("networkidle")
-
+                page.wait_for_timeout(20000)
                 # Listen to all requests
                 page.on("requestfinished", handle_request)
 
                 page.locator("#sc-navbar-container").get_by_text("Reports", exact=True).click()
                 page.get_by_role("link", name="Advertising Reports External").click()
                 page.get_by_label("Sponsored ads reports", exact=True).click()
-                page.wait_for_load_state("networkidle")
 
             if amazon_fulfillment:
                 page.get_by_label("Navigation menu").click()
-                page.wait_for_load_state("networkidle")
+                page.wait_for_timeout(10000)
 
                 # Listen to all requests
                 page.on("requestfinished", handle_request)
@@ -185,7 +178,6 @@ def login_and_get_cookie(
                     page.get_by_role("link", name="Fulfilment by Amazon Remove").click()
                 page.get_by_text("Show more...").nth(1).click()
                 page.locator("#report-central-nav").get_by_role("link", name="All Orders").click()
-                page.wait_for_load_state("networkidle")
 
             # Collect session cookies
             logger.info("Collecting session cookies...")
@@ -215,10 +207,4 @@ def login_and_get_cookie(
 
 
 if __name__ == "__main__":
-    cookie, headers = login_and_get_cookie(
-        username="REDACTED_EMAIL",
-        password="N3xusBrandGroup",
-        otp_secret="N3J6EI2PTTKMALRPUMXIZNQHW3U3LZAV32YSXOBPHYKLC4CL3GWA",
-        headless=False,
-        amazon_ads=True,
-    )
+    pass

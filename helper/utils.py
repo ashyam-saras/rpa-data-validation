@@ -1,3 +1,4 @@
+import os
 from google.cloud import storage
 from pathlib import Path
 import argparse
@@ -111,6 +112,25 @@ def parse_args(
     parser.add_argument("--start_date", required=True, help=f"Start date in {date_format} format")
     parser.add_argument("--end_date", required=True, help=f"End date in {date_format} format")
 
+    parser.add_argument(
+        "--user_name",
+        type=str,
+        required=True,
+        help="Client Username to login",
+    )
+    parser.add_argument(
+        "--password",
+        type=str,
+        required=True,
+        help="Client Password to login",
+    )
+    parser.add_argument(
+        "--otp_secret",
+        type=str,
+        required=True,
+        help="Client OTP Secret to login",
+    )
+
     if optional_args:
         # Optional arguments
         parser.add_argument(
@@ -144,3 +164,17 @@ def parse_args(
         )
 
     return parser.parse_args()
+
+
+def reset_cookie(cookie_storage_path: str):
+    # Remove auth_state.json file to clear cookies
+    try:
+
+        print("Cookie storage path", cookie_storage_path)
+
+        if cookie_storage_path.exists():
+            print("Removing auth_state.json")
+            os.remove(cookie_storage_path)
+    except Exception as e:
+        logger.error(f"Error removing auth_state.json: {str(e)}")
+        raise e

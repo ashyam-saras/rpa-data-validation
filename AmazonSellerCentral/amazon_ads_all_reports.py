@@ -6,15 +6,13 @@ import requests
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 import pandas as pd
 from io import BytesIO
-from helper.utils import parse_args, save_content_to_file, upload_to_gcs
+from helper.utils import parse_args, save_content_to_file, upload_to_gcs, reset_cookie
 from helper.logging import logger
 from auth import login_and_get_cookie
 from datetime import datetime, timedelta
 import yaml
-import os
 
-STORAGE_STATE_PATH = Path(__file__).parent / "auth_state.json"
-
+COOKIE_STORAGE_PATH = Path(__file__).parent / "auth_state.json"
 CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "amazon_ads_report_config.yaml"
 with open(CONFIG_FILE_PATH, "r") as file:
     config = yaml.safe_load(file)
@@ -310,8 +308,6 @@ def download_actual_report(
 
 if __name__ == "__main__":
 
-    ##TODO: CHECK IF TIMESTAMP IS GETTING CONVERTED TO CORRECT DATES IN UI
-
     args = parse_args(
         description="Download Amazon Ads reports for a date range",
         date_format="YYYY/MM/DD",
@@ -321,12 +317,15 @@ if __name__ == "__main__":
 
     report_list = args.report_list.split(",")
 
-    # Remove auth_state.json file to clear cookies
-    if STORAGE_STATE_PATH.exists():
-        print("Removing auth_state.json")
-        os.remove(STORAGE_STATE_PATH)
+    reset_cookie(cookie_storage_path=COOKIE_STORAGE_PATH)
 
-    cookie, headers = login_and_get_cookie(amazon_ads=True, market_place=args.market_place, headless=False)
+    cookie, headers = login_and_get_cookie(
+        amazon_ads=True,
+        market_place=args.market_place,
+        username=args.user_name,
+        password=args.password,
+        otp_secret=args.otp_secret,
+    )
 
     for report_name in report_list:
 
