@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 
@@ -9,11 +8,11 @@ from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 from auth import login_and_get_cookie
 from io import StringIO
 import pandas as pd
-from helper.utils import save_content_to_file, parse_args, upload_to_gcs
+from helper.utils import save_content_to_file, parse_args, upload_to_gcs, reset_cookie
 from helper.logging import logger
 import yaml
 
-STORAGE_STATE_PATH = Path(__file__).parent / "auth_state.json"
+COOKIE_STORAGE_PATH = Path(__file__).parent / "auth_state.json"
 
 CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "fulfillment_all_reports_config.yaml"
 with open(CONFIG_FILE_PATH, "r") as file:
@@ -317,18 +316,14 @@ if __name__ == "__main__":
 
     report_list = args.report_list.split(",")
 
-    # Remove auth_state.json file to clear cookies
-    if STORAGE_STATE_PATH.exists():
-        print("Removing auth_state.json")
-        os.remove(STORAGE_STATE_PATH)
+    reset_cookie(cookie_storage_path=COOKIE_STORAGE_PATH)
 
     cookie, headers = login_and_get_cookie(
         amazon_fulfillment=True,
         market_place=args.market_place,
-        headless=False,
-        username="REDACTED_EMAIL",
-        password="REDACTED_PASS",
-        otp_secret="REDACTED_KEY",
+        username=args.user_name,
+        password=args.password,
+        otp_secret=args.otp_secret,
     )
 
     for report_name in report_list:
