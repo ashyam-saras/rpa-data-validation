@@ -1,0 +1,37 @@
+fulfillment_reports_config:
+  All Orders:
+    params:
+      reportFileFormat: "TSV"
+      reportStartDate: "{start_date}"
+      reportEndDate: "{end_date}"
+      xdaysBeforeUntilToday: -1
+      reportFRPId: "2400"
+      startDateTimeOffset: 0
+      endDateTimeOffset: 0
+      disableTimezone: "true"
+    folder_name: "all_orders"
+    file_prefix: "AllOrders"
+  
+  FBA Customer Returns:
+    params:
+      reportFileFormat: "CSV"
+      reportStartDate: "{start_date}"
+      reportEndDate: "{end_date}"
+      xdaysBeforeUntilToday: -1
+      reportFRPId: "2610"
+      startDateTimeOffset: 0
+      endDateTimeOffset: 0
+      disableTimezone: "true"
+    folder_name: "fba_customer_returns"
+    file_prefix: "FBACustomerReturns"
+
+  FBA Inventory:
+    params:
+      reportFileFormat: "CSV"
+      xdaysBeforeUntilToday: 0
+      reportFRPId: "19600"
+      startDateTimeOffset: 0
+      endDateTimeOffset: 0
+      disableTimezone: "true"
+    folder_name: "fba_inventory"
+    file_prefix: "FBAInventory"
