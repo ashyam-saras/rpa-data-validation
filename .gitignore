@@ -166,3 +166,4 @@ screenshots/
 data/
 logfile.txt
 *solutionsdw_rpa_data_validation_bot.json
+*auth_state.json

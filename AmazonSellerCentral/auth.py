@@ -5,8 +5,12 @@ import pyotp
 from playwright.sync_api import Page, Playwright, sync_playwright
 from tenacity import RetryCallState, retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from helper.logging import logger
+import yaml
 
 # Constants
+MARKET_PLACE_CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "market_place_config.yaml"
+with open(MARKET_PLACE_CONFIG_FILE_PATH, "r") as file:
+    market_place_config = yaml.safe_load(file)
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -113,10 +117,12 @@ def login_and_get_cookie(
 
     with sync_playwright() as p:
         browser, context = setup_browser(p, headless)
+        context = browser.new_context(locale="en-US")
         page = context.new_page()
         global csrf_token
         global headers
         try:
+            marketplace_config = market_place_config.get("marketplace_config", {}).get(market_place)
 
             # navigate to amazon seller central
 
@@ -148,6 +154,11 @@ def login_and_get_cookie(
                     page.wait_for_timeout(30000)
                     handle_2FA(page=page, otp_secret=otp_secret)
 
+                # Change the lanuguage
+                page.get_by_label("Language").locator("div").filter(has_text="EN").locator("div").click()
+                page.get_by_role(
+                    "link", name=f"English {marketplace_config['english_country']} ({marketplace_config['locale']})"
+                ).click()
             else:
                 logger.info("Already logged in, skipping login.")
                 if page.get_by_role("button", name="Select account", exact=True).is_visible():

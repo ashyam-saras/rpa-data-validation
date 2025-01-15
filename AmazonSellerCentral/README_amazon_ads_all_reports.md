@@ -18,13 +18,13 @@ python amazon_ads_all_reports.py --report_list <report_names> --start_date <star
 - `--user_name`: Amazon Seller Central username.
 - `--password`: Amazon Seller Central password.
 - `--otp_secret`: OTP secret for two-factor authentication.
-- `--client` (optional): Client name for GCS path organization (default: "nexusbrand").
-- `--brandname` (optional): Brand name for filename and GCS path (default: "ExplodingKittens").
+- `--client` (optional): Client name for GCS path organization 
+- `--brandname` (optional): Brand name for filename and GCS path 
 - `--bucket_name` (optional): Google Cloud Storage bucket name (default: "rpa_validation_bucket").
 
 ### Example Command
 ```bash
-python amazon_ads_all_reports.py --report_list "Sponsored Products Search term report,Sponsored Display Targeting report" --start_date "2023/01/01" --end_date "2023/01/31" --market_place "United States" --user_name "client_username" --password "client_password" --otp_secret "otp_secret"
+python amazon_ads_all_reports.py --report_list "Sponsored Products Search term report,Sponsored Display Targeting report" --start_date "2023/01/01" --end_date "2023/01/31" --market_place "United States" --user_name "client_username" --password "client_password" --otp_secret "otp_secret" --client "client_name" --brand_name "brand_name"
 ```
 
 ### Report Names from YAML Config
@@ -97,8 +97,8 @@ python sales_traffic.py  --start_date 2024-12-20 --end_date 2024-12-29 --market_
 - `--user_name`: Amazon Seller Central username.
 - `--password`: Amazon Seller Central password.
 - `--otp_secret`: OTP secret for two-factor authentication.
-- `--client` (optional): Client name for GCS path organization (default: "nexusbrand").
-- `--brandname` (optional): Brand name for filename and GCS path (default: "ExplodingKittens").
+- `--client` (optional): Client name for GCS path organization.
+- `--brandname` (optional): Brand name for filename and GCS path.
 - `--bucket_name` (optional): Google Cloud Storage bucket name (default: "rpa_validation_bucket").
 
 
@@ -121,8 +121,8 @@ python payment_transaction.py  --start_date 2024/12/20 --end_date 2024/12/29 --m
 - `--user_name`: Amazon Seller Central username.
 - `--password`: Amazon Seller Central password.
 - `--otp_secret`: OTP secret for two-factor authentication.
-- `--client` (optional): Client name for GCS path organization (default: "nexusbrand").
-- `--brandname` (optional): Brand name for filename and GCS path (default: "ExplodingKittens").
+- `--client` (optional): Client name for GCS path organization. 
+- `--brandname` (optional): Brand name for filename and GCS path.
 - `--bucket_name` (optional): Google Cloud Storage bucket name (default: "rpa_validation_bucket").
 
 ### Marketplaces from Config
@@ -139,4 +139,5 @@ The available marketplaces can be retrieved from the `market_place_config.yaml` 
 - Ensure that the `auth_state.json` file is removed before running the script to clear any existing cookies.
 - The script will automatically handle login and cookie management.
 - The downloaded reports will be saved locally and uploaded to the specified Google Cloud Storage bucket.
-- Logfile can be refered to check the status of report generation. 
+- **Logging**: The script uses a logging mechanism to capture detailed information about its execution. Logs include timestamps, log levels (INFO, WARNING, ERROR), and messages. The log file is saved in the same directory as the script and can be used to troubleshoot issues and verify the steps performed by the script.
+- Incase of Script Failure due to maximum retry and network issue, try re-running the script. The Scripts Over-writes already present files with the same name, both in local directory and GCS Bucket.
