@@ -1,0 +1,39 @@
+PO_reports_config:
+  PO Report:
+    url: "https://vendorcentral.amazon.com/po-api/vendor/members/po-mgmt/search/search-po-headers"
+    payload:
+        getTotalNumOfResults: "True"
+        pageSize: "1000"
+        sortOrder: "DESC"
+        vcpoHeaderSortField: "OrderDateUTC"
+        vcpoHeaderSearchCriteria:
+          cancellationDeadlineFrom: "null"
+          cancellationDeadlineTo: "null"
+          consolidationIdList: []
+          fcIds: []
+          handoffWindowStartFrom: "null"
+          handoffWindowStartTo: "null"
+          handoffWindowEndFrom: "null"
+          handoffWindowEndTo: "null"
+          orderDateFrom: '{start_date}'
+          orderDateTo: '{end_date}'
+          orderIds: []
+          vendorList: []
+          vendorFacingStatus: []
+        vcpoItemSearchCriteria:
+          externalIdList: []
+          fnskuList: []
+          vendorSkuList: []
+          merchantSkuList: []
+        fetchCancellationData: "False"
+        fetchCompleteItemData: "False"
+        fetchPriorityData: "False"
+    params:
+      
+    folder_name: "PO_reports"
+    file_prefix: "POReport"
+    retry_wait_time: 30
+     
+
+      
+   
