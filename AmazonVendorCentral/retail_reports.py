@@ -207,7 +207,12 @@ def download_actual_report(
     try:
         validate_parameters(report_start_date, report_end_date)
 
-        cookie, headers = login_and_get_cookie(amazon_retail=True)
+        cookie, headers = login_and_get_cookie(
+            amazon_retail=True,
+            username=args.user_name,
+            password=args.password,
+            otp_secret=args.otp_secret,
+            )
 
         report_status, requested_content = request_report(
             url=url, params=params, payload=payload, cookie=cookie, headers=headers

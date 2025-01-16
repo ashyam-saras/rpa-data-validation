@@ -106,9 +106,9 @@ def setup_browser(playwright: Playwright, headless: bool):
     before_sleep=log_retry_attempt,
 )
 def login_and_get_cookie(
-    username: str = "explodingkittens@nexusbrandgroup.com",
-    password: str = "N3xusBrandGroup",
-    otp_secret: str = "N3J6EI2PTTKMALRPUMXIZNQHW3U3LZAV32YSXOBPHYKLC4CL3GWA",
+    username: str,
+    password: str,
+    otp_secret: str,
     headless: bool = True,
     amazon_retail: bool = False,
     context: Page = None,
