@@ -124,7 +124,7 @@ def login_and_get_cookie(
         global custom_context
         try:
 
-            # navigate to amazon vendor central
+            # navigate to amazon vendorcentral
 
             page.goto("https://vendorcentral.amazon.com/", timeout=60000)
             page.wait_for_load_state("networkidle")
