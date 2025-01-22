@@ -1,4 +1,13 @@
-# Amazon Ads All Reports Script Documentation
+# Amazon Seller Central Scripts
+
+This folder contains scripts for downloading Amazon Seller Central reports and uploading them to Google Cloud Storage. It is designed to be run on a server or a local machine by a user.
+
+## Table of Contents
+  - [amazon_ads_all_reports.py](#amazon_ads_all_reportspy)
+  - [fulfillment_all_reports.py](#fulfillment_all_reportspy)
+  - [sales_traffic.py](#sales_trafficpy)
+  - [payment_transaction.py](#payment_transactionpy)
+
 
 ## amazon_ads_all_reports.py
 
@@ -39,9 +48,6 @@ The list of report names can also be retrieved from YAML config files. Ensure th
 - Sponsored Brands Campaign report (Date format: YYYY/MM/DD)
 
 
-
-# Amazon Fulfillment All Reports Script Documentation
-
 ## fulfillment_all_reports.py
 
 ### Description
@@ -77,9 +83,6 @@ The list of report names can also be retrieved from YAML config files. Ensure th
 - FBA Customer Returns (Date format: YYYY/MM/DD)
 - FBA Inventory (Date format: YYYY/MM/DD)
 
-
-# Sales and Traffic Report
-
 ## sales_traffic.py
 
 ### Description
@@ -101,8 +104,6 @@ python sales_traffic.py  --start_date 2024-12-20 --end_date 2024-12-29 --market_
 - `--brandname` (optional): Brand name for filename and GCS path.
 - `--bucket_name` (optional): Google Cloud Storage bucket name (default: "rpa_validation_bucket").
 
-
-# Payment Transaction Report
 
 ## payment_transaction.py
 
@@ -134,6 +135,8 @@ The available marketplaces can be retrieved from the `market_place_config.yaml` 
 - France
 - Italy
 - Spain
+
+---
 
 ### Additional Information
 - Ensure that the `auth_state.json` file is removed before running the script to clear any existing cookies.
