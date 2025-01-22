@@ -1,3 +1,5 @@
+import json
+import re
 import sys
 from pathlib import Path
 
@@ -21,6 +23,7 @@ MARKET_PLACE_CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "marke
 with open(MARKET_PLACE_CONFIG_FILE_PATH, "r") as file:
     market_place_config = yaml.safe_load(file)
 marketplace_config = None
+entity_id = None
 
 
 def load_report_from_yaml(
@@ -116,7 +119,39 @@ def request_report(url: str, params: dict, payload: dict, cookie: dict, headers:
     # Request payload
     payload = payload
 
+    global entity_id
+
     try:
+        response = requests.get(
+            url=f"https://sellercentral.amazon.{marketplace_config["url_domain"]}/global-dashboard/rest/v1/widgets/link-farm/settings?category=ACCOUNT_MANAGEMENT",
+            cookies=cookie,
+        )
+
+        # Extract the value of 'encMerchantId'
+        response_json = response.json()
+        response_payload = json.loads(response_json["responsePayload"])
+        enc_merchant_id = response_payload["merchantLevelDataResponses"][0]["encMerchantId"]
+        logger.info(f"enc_merchant_id: {enc_merchant_id} ")
+
+        locale = marketplace_config["locale"].replace("-", "_")
+        response = requests.get(
+            url=f"https://advertising.amazon.{marketplace_config["url_domain"]}/reports/ref=xx_perftime_dnav_xx?merchantId={enc_merchant_id}&locale={locale}&ref=RedirectedFromSellerCentralByRoutingService",
+            cookies=cookie,
+        )
+        response_text = response.text
+        match = re.search(r'"entityId":\s?"([^"]+)"', response_text)
+        if match:
+            entity_id = match.group(1)
+            logger.info(f"Entity ID: {entity_id}")
+        else:
+            logger.info("entityId not found.")
+
+    except Exception as e:
+        logger.error(f"Request failed while extracting entityID: {e}")
+        return None, None
+
+    try:
+        params["entityId"] = entity_id
         response = requests.put(url=url, params=params, json=payload, cookies=cookie, headers=headers)
 
         logger.info(f"Response Status: {response.status_code}")
@@ -151,7 +186,7 @@ def check_report_status(requested_report_id: str, cookie: dict, headers: dict, r
         try:
             logger.info("Checking report Status")
 
-            url = f"https://advertising.amazon.{marketplace_config["url_domain"]}/reports/api/subscriptions?entityId={marketplace_config["entityId"]}"
+            url = f"https://advertising.amazon.{marketplace_config["url_domain"]}/reports/api/subscriptions?entityId={entity_id}"
 
             payload = {
                 "filters": [

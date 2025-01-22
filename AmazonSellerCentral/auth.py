@@ -155,12 +155,16 @@ def login_and_get_cookie(
                     handle_2FA(page=page, otp_secret=otp_secret)
 
                 # Change the lanuguage
-                if market_place != "United States":
-                    page.get_by_label("Language").locator("div").filter(has_text="EN").locator("div").click()
-                    page.get_by_role(
-                        "link",
-                        name=f"English {marketplace_config['english_country']} ({marketplace_config['locale']})",
-                    ).click()
+                try:
+                    if market_place != "United States":
+                        page.get_by_label("Language").locator("div").filter(has_text="EN").locator("div").click()
+                        page.get_by_role(
+                            "link",
+                            name=f"English {marketplace_config['english_country']} ({marketplace_config['locale']})",
+                        ).click()
+                except:
+                    logger.info("Language Already Selected")
+
             else:
                 logger.info("Already logged in, skipping login.")
                 if page.get_by_role("button", name="Select account", exact=True).is_visible():

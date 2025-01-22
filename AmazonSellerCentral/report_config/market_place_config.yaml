@@ -6,7 +6,7 @@ marketplace_config:
     locale: "en-DE"
   United States:
     url_domain: "com"
-    entityId: "ENTITYK52N69ABC6OY"
+    entityId: "ENTITY3BPXP980Q5PU1"
     english_country: "United States"
     locale: "en-US"
   United Kingdom:
@@ -47,8 +47,8 @@ marketplace_config:
   Canada:
     url_domain: "ca"
     entityId: "ENTITY350MYT9JB3O8Q"  
-    english_country: "United Kingdom"
-    locale: "en-GB"
+    english_country: "Canada"
+    locale: "en-CA"
   Australia:     #Need to update the details
     url_domain: "com.au"
     entityId: "ENTITY350MYT9JB3O8Q"  
