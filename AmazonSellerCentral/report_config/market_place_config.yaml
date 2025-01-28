@@ -1,0 +1,64 @@
+marketplace_config:
+  Germany:
+    url_domain: "de"
+    entityId: "ENTITY33VBUQPUJLTCJ"
+    english_country: "United Kingdom"
+    locale: "en-DE"
+  United States:
+    url_domain: "com"
+    entityId: "ENTITY3BPXP980Q5PU1"
+    english_country: "United States"
+    locale: "en-US"
+  United Kingdom:
+    url_domain: "co.uk"
+    entityId: "ENTITYAWM3E2DMKDTH"
+    english_country: "United Kingdom"
+    locale: "en-GB"
+  France:
+    url_domain: "fr"
+    entityId: "ENTITYHT2UAVBKZQKA"
+    english_country: "United Kingdom"
+    locale: "en-FR"
+  Italy:
+    url_domain: "it"
+    entityId: "ENTITYX1M7P6T2D34X"
+    english_country: "United Kingdom"
+    locale: "en-IT"
+  Spain:
+    url_domain: "es"
+    entityId: "ENTITY414ML8PTCBHM"
+    english_country: "United Kingdom"
+    locale: "en-ES"
+  Netherlands:
+    url_domain: "nl"
+    entityId: "ENTITY3STC1UP2D21CY"
+    english_country: "United Kingdom"
+    locale: "en-GB"
+  Mexico:
+    url_domain: "com.mx"
+    entityId: "ENTITY2M238GXM1WKZL"
+    english_country: "United States"
+    locale: "en-MX"
+  Poland:
+    url_domain: "pl"
+    entityId: ""  
+    english_country: "United Kingdom"
+    locale: "en-GB"
+  Canada:
+    url_domain: "ca"
+    entityId: "ENTITY350MYT9JB3O8Q"  
+    english_country: "Canada"
+    locale: "en-CA"
+  Australia:     #Need to update the details
+    url_domain: "com.au"
+    entityId: "ENTITY350MYT9JB3O8Q"  
+    english_country: "Australia"
+    locale: "en-AU"
+  Belgium:     #Need to update the details
+    url_domain: "com.be"
+    entityId: "ENTITY350MYT9JB3O8Q"  
+    english_country: "United Kingdom"
+    locale: "en-GB"
+
+  
+    
