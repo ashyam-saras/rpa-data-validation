@@ -16,7 +16,7 @@ This script downloads Amazon Ads reports for a specified date range and uploads 
 
 ### Usage
 ```bash
-python amazon_ads_all_reports.py --report_list <report_names> --start_date <start_date> --end_date <end_date> --market_place <market_place> --user_name <user_name> --password <password> --otp_secret <otp_secret> --client <client> --brandname <brandname> --bucket_name <bucket_name>
+python amazon_ads_all_reports.py --report_list <report_names> --start_date <start_date> --end_date <end_date> --market_place <market_place> --user_name <user_name> --password <password> --otp_secret <otp_secret> --client <client> --brandname <brandname> --bucket_name <bucket_name> --account <account>
 ```
 
 ### Arguments
@@ -33,7 +33,7 @@ python amazon_ads_all_reports.py --report_list <report_names> --start_date <star
 
 ### Example Command
 ```bash
-python amazon_ads_all_reports.py --report_list "Sponsored Products Search term report,Sponsored Display Targeting report" --start_date "2023/01/01" --end_date "2023/01/31" --market_place "United States" --user_name "client_username" --password "client_password" --otp_secret "otp_secret" --client "client_name" --brand_name "brand_name"
+python amazon_ads_all_reports.py --report_list "Sponsored Products Search term report,Sponsored Display Targeting report" --start_date "2023/01/01" --end_date "2023/01/31" --market_place "United States" --user_name "client_username" --password "client_password" --otp_secret "otp_secret" --client "client_name" --brand_name "brand_name" --account "account"
 ```
 
 ### Report Names from YAML Config
@@ -55,7 +55,7 @@ This script downloads Amazon Fulfillment reports for a specified date range and 
 
 ### Usage
 ```bash
-python fulfillment_all_reports.py --report_list <report_names> --start_date <start_date> --end_date <end_date> --market_place <market_place> --user_name <user_name> --password <password> --otp_secret <otp_secret> --client <client> --brandname <brandname> --bucket_name <bucket_name>
+python fulfillment_all_reports.py --report_list <report_names> --start_date <start_date> --end_date <end_date> --market_place <market_place> --user_name <user_name> --password <password> --otp_secret <otp_secret> --client <client> --brandname <brandname> --bucket_name <bucket_name> --account <account>
 ```
 
 ### Arguments
@@ -69,10 +69,11 @@ python fulfillment_all_reports.py --report_list <report_names> --start_date <sta
 - `--client` (optional): Client name for GCS path organization (default: "nexusbrand").
 - `--brandname` (optional): Brand name for filename and GCS path (default: "ExplodingKittens").
 - `--bucket_name` (optional): Google Cloud Storage bucket name (default: "rpa_validation_bucket").
+- `--account`:Account to login.
 
 ### Example Command
 ```bash
-python fulfillment_all_reports.py --report_list "All Orders,FBA Customer Returns" --start_date "2023/01/01" --end_date "2023/01/31" --market_place "United States" --user_name "client_username" --password "client_password" --otp_secret "otp_secret"
+python fulfillment_all_reports.py --report_list "All Orders,FBA Customer Returns" --start_date "2023/01/01" --end_date "2023/01/31" --market_place "United States" --user_name "client_username" --password "client_password" --otp_secret "otp_secret" --account "account"
 ```
 
 ### Report Names from YAML Config
@@ -90,7 +91,7 @@ This script downloads Amazon Sales and Traffic reports for a specified date rang
 
 ## Usage
 ```bash
-python sales_traffic.py  --start_date 2024-12-20 --end_date 2024-12-29 --market_place 'Italy' --user_name 'client_username' --password 'client_password' --otp_secret 'otp_secret'
+python sales_traffic.py  --start_date 2024-12-20 --end_date 2024-12-29 --market_place 'Italy' --user_name 'client_username' --password 'client_password' --otp_secret 'otp_secret' --account "account"
 ```
 
 ### Arguments
@@ -103,7 +104,7 @@ python sales_traffic.py  --start_date 2024-12-20 --end_date 2024-12-29 --market_
 - `--client` (optional): Client name for GCS path organization.
 - `--brandname` (optional): Brand name for filename and GCS path.
 - `--bucket_name` (optional): Google Cloud Storage bucket name (default: "rpa_validation_bucket").
-
+- `--account`:Account to login.
 
 ## payment_transaction.py
 
@@ -112,7 +113,7 @@ This script downloads Amazon Payment reports for a specified date range and uplo
 
 ## Usage
 ```bash
-python payment_transaction.py  --start_date 2024/12/20 --end_date 2024/12/29 --market_place 'Italy' --user_name 'client_username' --password 'client_password' --otp_secret 'otp_secret'
+python payment_transaction.py  --start_date 2024/12/20 --end_date 2024/12/29 --market_place 'Italy' --user_name 'client_username' --password 'client_password' --otp_secret 'otp_secret' --account "account"
 ```
 
 ### Arguments
@@ -125,6 +126,7 @@ python payment_transaction.py  --start_date 2024/12/20 --end_date 2024/12/29 --m
 - `--client` (optional): Client name for GCS path organization. 
 - `--brandname` (optional): Brand name for filename and GCS path.
 - `--bucket_name` (optional): Google Cloud Storage bucket name (default: "rpa_validation_bucket").
+- `--account`:Account to login.
 
 ### Marketplaces from Config
 The available marketplaces can be retrieved from the `market_place_config.yaml` file. Ensure the config file is properly formatted and contains the necessary marketplace information.
