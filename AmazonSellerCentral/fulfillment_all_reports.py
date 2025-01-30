@@ -41,7 +41,7 @@ def load_report_from_yaml(report_name: str, market_place: str, start_date: str =
     global BASE_URL
     global marketplace_config
     marketplace_config = market_place_config.get("marketplace_config", {}).get(market_place)
-    BASE_URL = f"https://sellercentral.amazon.{marketplace_config["url_domain"]}/reportcentral/api/v1"
+    BASE_URL = f"https://sellercentral.amazon.{marketplace_config["fulfillment_url_domain"]}/reportcentral/api/v1"
 
     report_config = config["fulfillment_reports_config"].get(report_name, {})
 
@@ -324,6 +324,8 @@ if __name__ == "__main__":
         username=args.user_name,
         password=args.password,
         otp_secret=args.otp_secret,
+        headless=False,
+        account=args.account,
     )
 
     for report_name in report_list:

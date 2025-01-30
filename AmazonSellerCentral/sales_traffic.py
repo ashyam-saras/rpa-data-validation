@@ -174,6 +174,7 @@ def download_sales_traffic_report(
     user_name: str,
     password: str,
     otp_secret: str,
+    account: str,
     client: str = "nexusbrand",
     brandname: str = "ExplodingKittens",
     bucket_name: str = "rpa_validation_bucket",
@@ -206,6 +207,7 @@ def download_sales_traffic_report(
             username=user_name,
             password=password,
             otp_secret=otp_secret,
+            account=account,
         )
 
         download_url = request_sales_traffic_report(
@@ -262,7 +264,7 @@ if __name__ == "__main__":
     )
 
     marketplace_config = market_place_config.get("marketplace_config", {}).get(args.market_place)
-    BASE_URL = f"https://sellercentral.amazon.{marketplace_config["url_domain"]}/business-reports/api"
+    BASE_URL = f"https://sellercentral.amazon.{marketplace_config["sales_url_domain"]}/business-reports/api"
 
     reset_cookie(cookie_storage_path=COOKIE_STORAGE_PATH)
 
@@ -276,4 +278,5 @@ if __name__ == "__main__":
         user_name=args.user_name,
         password=args.password,
         otp_secret=args.otp_secret,
+        account=args.account,
     )

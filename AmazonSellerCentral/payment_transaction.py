@@ -159,6 +159,7 @@ def download_transaction_report(
     user_name: str,
     password: str,
     otp_secret: str,
+    account: str,
     client: str = "nexusbrand",
     brandname: str = "ExplodingKittens",
     bucket_name: str = "rpa_validation_bucket",
@@ -187,6 +188,7 @@ def download_transaction_report(
             username=user_name,
             password=password,
             otp_secret=otp_secret,
+            account=account,
         )
 
         report_reference_id, report_status = request_report(
@@ -236,7 +238,7 @@ if __name__ == "__main__":
         optional_args=True,
     )
     marketplace_config = market_place_config.get("marketplace_config", {}).get(args.market_place)
-    BASE_URL = f"https://sellercentral.amazon.{marketplace_config["url_domain"]}/payments/reports/api"
+    BASE_URL = f"https://sellercentral.amazon.{marketplace_config["pay_url_domain"]}/payments/reports/api"
 
     reset_cookie(cookie_storage_path=COOKIE_STORAGE_PATH)
 
@@ -247,4 +249,5 @@ if __name__ == "__main__":
         user_name=args.user_name,
         password=args.password,
         otp_secret=args.otp_secret,
+        account=args.account,
     )
