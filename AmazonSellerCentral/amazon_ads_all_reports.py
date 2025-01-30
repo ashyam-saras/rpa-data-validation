@@ -367,7 +367,6 @@ if __name__ == "__main__":
         password=args.password,
         otp_secret=args.otp_secret,
         account=args.account,
-        headless=False,
     )
 
     for report_name in report_list:
