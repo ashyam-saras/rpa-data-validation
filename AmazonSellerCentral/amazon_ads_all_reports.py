@@ -14,6 +14,7 @@ from auth import login_and_get_cookie
 from datetime import datetime, timedelta
 import yaml
 
+BASE_URL = "https://advertising.amazon"
 COOKIE_STORAGE_PATH = Path(__file__).parent / "auth_state.json"
 CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "amazon_ads_report_config.yaml"
 with open(CONFIG_FILE_PATH, "r") as file:
@@ -135,7 +136,7 @@ def request_report(url: str, params: dict, payload: dict, cookie: dict, headers:
 
         locale = marketplace_config["locale"].replace("-", "_")
         response = requests.get(
-            url=f"https://advertising.amazon.{marketplace_config["url_domain"]}/reports/ref=xx_perftime_dnav_xx?merchantId={enc_merchant_id}&locale={locale}&ref=RedirectedFromSellerCentralByRoutingService",
+            url=f"{BASE_URL}.{marketplace_config["url_domain"]}/reports/ref=xx_perftime_dnav_xx?merchantId={enc_merchant_id}&locale={locale}&ref=RedirectedFromSellerCentralByRoutingService",
             cookies=cookie,
         )
         response_text = response.text
@@ -186,7 +187,7 @@ def check_report_status(requested_report_id: str, cookie: dict, headers: dict, r
         try:
             logger.info("Checking report Status")
 
-            url = f"https://advertising.amazon.{marketplace_config["url_domain"]}/reports/api/subscriptions?entityId={entity_id}"
+            url = f"{BASE_URL}.{marketplace_config["url_domain"]}/reports/api/subscriptions?entityId={entity_id}"
 
             payload = {
                 "filters": [
@@ -206,7 +207,11 @@ def check_report_status(requested_report_id: str, cookie: dict, headers: dict, r
                     .get("earliestUnprocessedReportSummary", {})
                     .get("status")
                 )
-                report_download_url = None
+                report_download_url = (
+                    json_response.get("subscriptions", [{}])[0]
+                    .get("latestProcessedReportSummary", {})
+                    .get("urlString")
+                )
             elif json_response.get("subscriptions", [{}])[0].get("latestProcessedReportSummary", {}):
                 report_status = (
                     json_response.get("subscriptions", [{}])[0].get("latestProcessedReportSummary", {}).get("status")
@@ -228,7 +233,7 @@ def check_report_status(requested_report_id: str, cookie: dict, headers: dict, r
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(5), retry=retry_if_result(lambda result: result is None))
-def download_report_data(report_download_url: str):
+def download_report_data(report_download_url: str, cookie: dict):
     """
     Download the report from the given URL.
 
@@ -240,7 +245,8 @@ def download_report_data(report_download_url: str):
     """
     try:
         logger.info("Started downloading")
-        response = requests.get(url=report_download_url)
+        url = f"{BASE_URL}.{marketplace_config["url_domain"]}" + report_download_url
+        response = requests.get(url=url, cookies=cookie)
 
         response.raise_for_status()
 
@@ -309,7 +315,7 @@ def download_actual_report(
                 end_date_formatted = datetime.strptime(report_end_date, "%Y/%m/%d").strftime("%Y%m%d")
 
                 output_file = f"{file_prefix}_{brandname}_{start_date_formatted}_{end_date_formatted}.csv"
-                csv_data = download_report_data(report_download_url)
+                csv_data = download_report_data(report_download_url, cookie)
                 file_path = save_content_to_file(content=csv_data, folder_name=folder_name, file_name=output_file)
 
                 if file_path:
@@ -360,6 +366,8 @@ if __name__ == "__main__":
         username=args.user_name,
         password=args.password,
         otp_secret=args.otp_secret,
+        account=args.account,
+        headless=False,
     )
 
     for report_name in report_list:
