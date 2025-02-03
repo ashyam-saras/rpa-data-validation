@@ -131,6 +131,13 @@ def parse_args(
         help="Client OTP Secret to login",
     )
 
+    parser.add_argument(
+        "--account",
+        type=str,
+        required=True,
+        help="Account to login",
+    )
+
     if optional_args:
         # Optional arguments
         parser.add_argument(

@@ -41,7 +41,7 @@ def load_report_from_yaml(report_name: str, market_place: str, start_date: str =
     global BASE_URL
     global marketplace_config
     marketplace_config = market_place_config.get("marketplace_config", {}).get(market_place)
-    BASE_URL = f"https://sellercentral.amazon.{marketplace_config["url_domain"]}/reportcentral/api/v1"
+    BASE_URL = f"https://sellercentral.amazon.{marketplace_config["fulfillment_url_domain"]}/reportcentral/api/v1"
 
     report_config = config["fulfillment_reports_config"].get(report_name, {})
 
@@ -316,15 +316,20 @@ if __name__ == "__main__":
 
     report_list = args.report_list.split(",")
 
-    reset_cookie(cookie_storage_path=COOKIE_STORAGE_PATH)
+    cookie = {}
+    headers = {}
 
-    cookie, headers = login_and_get_cookie(
-        amazon_fulfillment=True,
-        market_place=args.market_place,
-        username=args.user_name,
-        password=args.password,
-        otp_secret=args.otp_secret,
-    )
+    while len(cookie) == 0 or len(headers) == 0:
+        reset_cookie(cookie_storage_path=COOKIE_STORAGE_PATH)
+
+        cookie, headers = login_and_get_cookie(
+            amazon_fulfillment=True,
+            market_place=args.market_place,
+            username=args.user_name,
+            password=args.password,
+            otp_secret=args.otp_secret,
+            account=args.account,
+        )
 
     for report_name in report_list:
 

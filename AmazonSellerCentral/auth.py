@@ -107,6 +107,7 @@ def login_and_get_cookie(
     username: str,
     password: str,
     otp_secret: str,
+    account: str,
     headless: bool = True,
     amazon_ads: bool = False,
     amazon_fulfillment: bool = False,
@@ -140,7 +141,10 @@ def login_and_get_cookie(
 
                 handle_2FA(page=page, otp_secret=otp_secret)
 
-                page.get_by_role("button", name=market_place).click()
+                page.wait_for_timeout(5000)
+                if not page.get_by_role("button", name=market_place, exact=True).is_visible():
+                    page.get_by_role("button", name=account).click()
+                page.get_by_role("button", name=market_place, exact=True).click()
                 page.get_by_role("button", name="Select account").click()
                 page.wait_for_timeout(8000)
 
@@ -162,8 +166,13 @@ def login_and_get_cookie(
                             "link",
                             name=f"English {marketplace_config['english_country']} ({marketplace_config['locale']})",
                         ).click()
+                        logger.info(
+                            f"Language changed to English {marketplace_config['english_country']} ({marketplace_config['locale']})"
+                        )
                 except:
-                    logger.info("Language Already Selected")
+                    logger.info(
+                        f"Language Already Selected, English {marketplace_config['english_country']} ({marketplace_config['locale']})"
+                    )
 
             else:
                 logger.info("Already logged in, skipping login.")
@@ -189,11 +198,23 @@ def login_and_get_cookie(
                 page.on("requestfinished", handle_request)
 
                 page.locator("#sc-navbar-container").get_by_text("Reports", exact=True).click()
-                if page.get_by_role("link", name="Fulfillment Remove page from").count() > 0:
+                try:
                     page.get_by_role("link", name="Fulfillment Remove page from").click()
-                elif page.get_by_role("link", name="Fulfilment by Amazon Remove").count() > 0:
+                except:
+                    logger.info("Fulfillment Remove page from not found, trying another method")
+                try:
                     page.get_by_role("link", name="Fulfilment by Amazon Remove").click()
-                page.get_by_text("Show more...").nth(1).click()
+                except:
+                    logger.info("Fulfilment by Amazon Remove, trying another method")
+                try:
+                    page.get_by_role("link", name="Fulfillment Add page to").click()
+                except:
+                    logger.info("Fulfillment Add page to, trying another method")
+
+                try:
+                    page.get_by_text("Show more...").nth(1).click()
+                except:
+                    pass
                 page.locator("#report-central-nav").get_by_role("link", name="All Orders").click()
 
             # Collect session cookies

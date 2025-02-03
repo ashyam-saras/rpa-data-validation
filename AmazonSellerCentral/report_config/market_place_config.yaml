@@ -1,64 +1,97 @@
 marketplace_config:
   Germany:
+    fulfillment_url_domain: "de"
     url_domain: "de"
+    pay_url_domain: "com"
     entityId: "ENTITY33VBUQPUJLTCJ"
     english_country: "United Kingdom"
     locale: "en-DE"
   United States:
+    fulfillment_url_domain: "com"
     url_domain: "com"
+    pay_url_domain: "com"
     entityId: "ENTITY3BPXP980Q5PU1"
     english_country: "United States"
     locale: "en-US"
   United Kingdom:
+    fulfillment_url_domain: "co.uk"
     url_domain: "co.uk"
+    pay_url_domain: "com"
     entityId: "ENTITYAWM3E2DMKDTH"
     english_country: "United Kingdom"
     locale: "en-GB"
   France:
+    fulfillment_url_domain: "fr"
     url_domain: "fr"
+    pay_url_domain: "com"
     entityId: "ENTITYHT2UAVBKZQKA"
     english_country: "United Kingdom"
     locale: "en-FR"
   Italy:
+    fulfillment_url_domain: "it"
     url_domain: "it"
+    pay_url_domain: "com"
     entityId: "ENTITYX1M7P6T2D34X"
     english_country: "United Kingdom"
     locale: "en-IT"
   Spain:
+    fulfillment_url_domain: "es"
     url_domain: "es"
+    pay_url_domain: "com"
     entityId: "ENTITY414ML8PTCBHM"
     english_country: "United Kingdom"
     locale: "en-ES"
   Netherlands:
+    fulfillment_url_domain: "nl"
     url_domain: "nl"
+    pay_url_domain: "com"
     entityId: "ENTITY3STC1UP2D21CY"
     english_country: "United Kingdom"
     locale: "en-GB"
   Mexico:
+    fulfillment_url_domain: "com.mx"
     url_domain: "com.mx"
+    pay_url_domain: "com"
+    sales_url_domain: "com"
     entityId: "ENTITY2M238GXM1WKZL"
     english_country: "United States"
     locale: "en-MX"
   Poland:
+    fulfillment_url_domain: "pl"
     url_domain: "pl"
+    pay_url_domain: "com"
     entityId: ""  
     english_country: "United Kingdom"
     locale: "en-GB"
   Canada:
+    fulfillment_url_domain: "com"
     url_domain: "ca"
+    pay_url_domain: "com"
     entityId: "ENTITY350MYT9JB3O8Q"  
     english_country: "Canada"
     locale: "en-CA"
   Australia:     #Need to update the details
+    fulfillment_url_domain: "com.au"
     url_domain: "com.au"
+    pay_url_domain: "com"
     entityId: "ENTITY350MYT9JB3O8Q"  
     english_country: "Australia"
     locale: "en-AU"
   Belgium:     #Need to update the details
+    fulfillment_url_domain: "com.be"
     url_domain: "com.be"
+    pay_url_domain: "com"
     entityId: "ENTITY350MYT9JB3O8Q"  
     english_country: "United Kingdom"
     locale: "en-GB"
-
+  Brazil:       #Auth doesnt select the language. need to check
+    fulfillment_url_domain: "com.br"
+    url_domain: "com.br"
+    pay_url_domain: "com"
+    sales_url_domain: "com"
+    entityId: "ENTITY350MYT9JB3O8Q"  
+    english_country: "United States"
+    locale: "en-US"
+  
   
     
