@@ -6,7 +6,6 @@ from playwright.sync_api import Page, Playwright, sync_playwright
 from tenacity import RetryCallState, retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from helper.logging import logger
 import yaml
-import re
 
 # Constants
 MARKET_PLACE_CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "market_place_config.yaml"
