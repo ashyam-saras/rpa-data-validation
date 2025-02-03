@@ -316,17 +316,21 @@ if __name__ == "__main__":
 
     report_list = args.report_list.split(",")
 
-    reset_cookie(cookie_storage_path=COOKIE_STORAGE_PATH)
+    cookie = {}
+    headers = {}
 
-    cookie, headers = login_and_get_cookie(
-        amazon_fulfillment=True,
-        market_place=args.market_place,
-        username=args.user_name,
-        password=args.password,
-        otp_secret=args.otp_secret,
-        headless=False,
-        account=args.account,
-    )
+    while len(cookie) == 0 or len(headers) == 0:
+        reset_cookie(cookie_storage_path=COOKIE_STORAGE_PATH)
+
+        cookie, headers = login_and_get_cookie(
+            amazon_fulfillment=True,
+            market_place=args.market_place,
+            username=args.user_name,
+            password=args.password,
+            otp_secret=args.otp_secret,
+            headless=False,
+            account=args.account,
+        )
 
     for report_name in report_list:
 
