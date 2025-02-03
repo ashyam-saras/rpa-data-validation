@@ -328,7 +328,6 @@ if __name__ == "__main__":
             username=args.user_name,
             password=args.password,
             otp_secret=args.otp_secret,
-            headless=False,
             account=args.account,
         )
 
