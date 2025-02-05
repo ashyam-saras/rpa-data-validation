@@ -109,6 +109,7 @@ def login_and_get_cookie(
     username: str,
     password: str,
     otp_secret: str,
+    market_place: str,
     headless: bool = True,
     amazon_retail: bool = False,
     context: Page = None,
@@ -138,7 +139,7 @@ def login_and_get_cookie(
                 page.get_by_label("Sign in").click()
                 handle_2FA(page=page, otp_secret=otp_secret)
 
-                page.get_by_role("button", name="US - Exploding Kittens LLC").click()
+                page.get_by_role("button", name=market_place).click()
                 page.get_by_role("button", name="Select account").click()
 
             else:

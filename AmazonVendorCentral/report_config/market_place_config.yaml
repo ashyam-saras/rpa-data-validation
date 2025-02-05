@@ -1,0 +1,17 @@
+marketplace_config:
+  DE:
+    url_domain: "de"
+    # entityId: "ENTITY33VBUQPUJLTCJ"
+  US:
+    url_domain: "com"
+    # entityId: "ENTITYK52N69ABC6OY"
+  FR:
+    url_domain: "fr"
+    # entityId: "ENTITYHT2UAVBKZQKA"
+  IT:
+    url_domain: "it"
+    # entityId: "ENTITYX1M7P6T2D34X"
+  ES:
+    url_domain: "es"
+    # entityId: "ENTITY414ML8PTCBHM"
+  

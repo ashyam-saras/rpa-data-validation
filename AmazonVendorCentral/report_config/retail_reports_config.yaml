@@ -1,5 +1,5 @@
 retail_reports_config:
-  traffic:
+  Traffic:
     url: "https://vendorcentral.amazon.com/api/retail-analytics/v1/get-report-data"
     payload: 
       reportRequest:
@@ -19,29 +19,21 @@ retail_reports_config:
         metrics:
           - id: "ASIN"
           - id: "ITEM_NAME"
-          - id: "BRAND_CODE"
           - id: "BRAND"
-          - id: "CATEGORY"
-          - id: "SUBCATEGORY"
-          - id: "PARENT_ASIN"
-          - id: "UPC"
-          - id: "EAN"
-          - id: "ISBN"
-          - id: "MODEL_NUMBER"
           - id: "GLANCE_VIEWS"
         aggregations:
           - "ASIN"
         orderBy:
           metricId: "GLANCE_VIEWS"
           comparison: "NONE"
-          ascending: False
+          ascending: false
     params:
       
     folder_name: "retail_traffic"
     file_prefix: "RetailTraffic"
     retry_wait_time: 30
 
-  sales:
+  Sales:
     url: "https://vendorcentral.amazon.com/api/retail-analytics/v1/get-report-data"
     payload:
       reportRequest:
@@ -67,15 +59,7 @@ retail_reports_config:
         metrics:
           - id: "ASIN"
           - id: "ITEM_NAME"
-          - id: "BRAND_CODE"
           - id: "BRAND"
-          - id: "CATEGORY"
-          - id: "SUBCATEGORY"
-          - id: "PARENT_ASIN"
-          - id: "UPC"
-          - id: "EAN"
-          - id: "ISBN"
-          - id: "MODEL_NUMBER"
           - id: "SHIPPED_REVENUE"
           - id: "SHIPPED_COGS"
           - id: "SHIPPED_UNITS"

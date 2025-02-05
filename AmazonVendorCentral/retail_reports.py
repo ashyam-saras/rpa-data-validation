@@ -2,12 +2,13 @@ import sys
 import csv
 import json
 from pathlib import Path
+import pandas as pd
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 import requests
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 import pandas as pd
-from io import BytesIO
+from io import BytesIO, StringIO
 from helper.utils import parse_args, save_content_to_file, upload_to_gcs
 from helper.logging import logger
 from auth2 import login_and_get_cookie
@@ -18,9 +19,16 @@ CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "retail_reports_con
 with open(CONFIG_FILE_PATH, "r") as file:
     config = yaml.safe_load(file)
 
+MARKET_PLACE_CONFIG_FILE_PATH = Path(__file__).parent / "report_config" / "market_place_config.yaml"
+with open(MARKET_PLACE_CONFIG_FILE_PATH, "r") as file:
+    market_place_config = yaml.safe_load(file)
+marketplace_config = None
+
+BASE_URL = None
 
 def load_report_from_yaml(
     report_name: str,
+    market_place: str,
     report_start_date: str,
     report_end_date: str,
 ):
@@ -35,6 +43,10 @@ def load_report_from_yaml(
     Returns:
         A dictionary containing the report configuration, or None if the report is not found.
     """
+    global BASE_URL
+    global marketplace_config
+    marketplace_config = market_place_config.get("marketplace_config", {}).get(market_place.split(' ')[0])
+    BASE_URL = f'https://vendorcentral.amazon.{marketplace_config["url_domain"]}/api/retail-analytics/v1'
 
     # start_date_timestamp = int((datetime.strptime(report_start_date, "%Y-%m-%d").timestamp()) * 1000)
     # end_date_timestamp = int((datetime.strptime(report_end_date, "%Y-%m-%d").timestamp()) * 1000)
@@ -80,7 +92,7 @@ def validate_parameters(report_start_date: str, report_end_date: str):
     wait=wait_fixed(5),
     retry=retry_if_result(lambda result: result[0] == 201 and result[1] is None),
 )
-def request_report(url: str, params: dict, payload: dict, cookie: dict, headers: dict):
+def request_report(params: dict, payload: dict, cookie: dict, headers: dict):
     """
     Request the Retail reports from Amazon Vendor Central.
 
@@ -94,7 +106,7 @@ def request_report(url: str, params: dict, payload: dict, cookie: dict, headers:
     """
     logger.info("Requesting Retail report content.")
 
-    url = url
+    url = BASE_URL+ "/get-report-data"
     logger.info(url)
 
     # Query parameters
@@ -124,7 +136,7 @@ def download_report_data(requested_content):
     Download the report from the given requested content.
 
     Args:
-        requested_content: The json data to download the report.
+        requested_content: The JSON data to download the report.
 
     Returns:
         The CSV data of the report, or None if the download fails.
@@ -151,7 +163,7 @@ def download_report_data(requested_content):
         # Flatten rows into a 2D list
         flattened_rows = []
         for row in rows:
-            flattened_rows.append([item.get('rawValue', None) for item in row])
+            flattened_rows.append([item.get('value', None) for item in row])
 
         # Create DataFrame
         df = pd.DataFrame(flattened_rows, columns=columns)
@@ -162,24 +174,54 @@ def download_report_data(requested_content):
         return csv_data
     
 
+    
     except Exception as e:
         logger.error(f"Error downloading report: {e}")
         return None
+
+import pandas as pd
+
+def process_report(file_path, report_name, report_start_date, report_end_date, columns_to_clean=None, fill_value=0):
+    """
+    Process a report CSV file, adding a Date column and cleaning specified columns.
+    
+    :param file_path: Path to the CSV file.
+    :param report_name: Name of the report.
+    :param report_start_date: The start date of the report.
+    :param report_end_date: The end date of the report.
+    :param columns_to_clean: List of column names to clean (convert to numeric and handle NaN).
+    :param fill_value: Value to fill NaN values with.
+    """
+    if file_path:
+        if report_start_date == report_end_date:  # If start and end date are the same
+            df = pd.read_csv(file_path)
+            df.insert(0, "Date", pd.to_datetime(report_start_date))
+
+            # Clean the specified columns
+            if columns_to_clean:
+                for col in columns_to_clean:
+                    df[col] = pd.to_numeric(df[col], errors='coerce').fillna(fill_value).astype(int)
+            
+            # Save the modified DataFrame to CSV
+            df.to_csv(file_path, index=False, quotechar='"')
+            print(f"Processed {report_name} report successfully.")
+        else:
+            print(f"Start date and end date do not match for {report_name} report.")
 
 
 
 def download_actual_report(
     report_start_date: str,
     report_end_date: str,
-    url: str,
     params: dict,
     payload: dict,
     file_prefix: str,
     folder_name: str,
     retry_wait_time: int,
-    client: str = "nexusbrand",
+    client: str = "Nexusbrand",
     brandname: str = "ExplodingKittens",
     bucket_name: str = "rpa_validation_bucket",
+    report_name: str = "Retail",
 ):
     """
     Download Retail reports from Amazon Vendor Central and upload to Google Cloud Storage.
@@ -209,43 +251,59 @@ def download_actual_report(
 
         cookie, headers = login_and_get_cookie(
             amazon_retail=True,
+            market_place=args.market_place,
             username=args.user_name,
             password=args.password,
             otp_secret=args.otp_secret,
             )
 
         report_status, requested_content = request_report(
-            url=url, params=params, payload=payload, cookie=cookie, headers=headers
+            params=params, payload=payload, cookie=cookie, headers=headers
         )
+        # logger.info(requested_content)
 
         if report_status == 200 :
 
             start_date_formatted = datetime.strptime(report_start_date, "%Y-%m-%d").strftime("%Y%m%d")
             end_date_formatted = datetime.strptime(report_end_date, "%Y-%m-%d").strftime("%Y%m%d")
 
-            output_file = f"{file_prefix}_{brandname}_{start_date_formatted}_{end_date_formatted}.csv"
+            output_file = f"{file_prefix}_{start_date_formatted}_{end_date_formatted}.csv"
             csv_data = download_report_data(requested_content)
             csv_bytes = csv_data.encode('utf-8')
+            # logger.info("CSV data: " + str(csv_bytes))
             file_path = save_content_to_file(content=csv_bytes, folder_name=folder_name, file_name=output_file)
 
             if file_path:
+                if (report_name == "Sales" or report_name == "Traffic") and (report_start_date == report_end_date):
+                    df = pd.read_csv(file_path)
+                    df.insert(0, "Date", pd.to_datetime(report_start_date))
+                    if report_name == "Sales":
+                        # Handle non-finite values (NaN or inf) by filling them with 0 or another value
+                        df['SHIPPED_UNITS'] = pd.to_numeric(df['SHIPPED_UNITS'], errors='coerce').fillna(0).astype(int)
+                        
+                    # Save the modified DataFrame to CSV
+                    df.to_csv(file_path, index=False, quotechar='"')
+
+
+
                 # Extract year and month from end_date
                 end_date_obj = datetime.strptime(report_end_date, "%Y-%m-%d")
                 year = end_date_obj.strftime("%Y")
                 month = end_date_obj.strftime("%m")
 
-                destination_blob_name = f"UIReports/AmazonSellingPartner/{client}/{brandname}/{file_prefix}/year={year}/month={month}/{output_file}"
-                # upload_to_gcs(
-                #     local_file_name=output_file,
-                #     local_folder_name=folder_name,
-                #     bucket_name=bucket_name,
-                #     destination_blob_name=destination_blob_name,
-                # )
+                destination_blob_name = f"UIReports/AmazonVendorCentral/{client}/{file_prefix}/brandname={brandname}/year={year}/month={month}/{output_file}"
+                upload_to_gcs(
+                    local_file_name=output_file,
+                    local_folder_name=folder_name,
+                    bucket_name=bucket_name,
+                    destination_blob_name=destination_blob_name,
+                )
 
             else:
                 logger.error("Failed to download report")
                 return None
                 
+
         else:
             return None
 
@@ -271,10 +329,9 @@ if __name__ == "__main__":
         
         logger.info(f"GENERATING REPORT FOR {report_name}")
         report_config = load_report_from_yaml(
-            report_name=report_name, report_start_date=args.start_date, report_end_date=args.end_date
+            report_name=report_name, report_start_date=args.start_date, report_end_date=args.end_date, market_place=args.market_place
         )
 
-        url = report_config.get("url")
         params = report_config.get("params")
         payload = report_config.get("payload")
         folder_name = report_config.get("folder_name")
@@ -284,7 +341,6 @@ if __name__ == "__main__":
         download_actual_report(
             report_start_date=args.start_date,
             report_end_date=args.end_date,
-            url=url,
             params=params,
             payload=payload,
             file_prefix=file_prefix,
@@ -293,4 +349,5 @@ if __name__ == "__main__":
             client=args.client,
             brandname=args.brandname,
             bucket_name=args.bucket_name,
+            report_name=report_name,
         )

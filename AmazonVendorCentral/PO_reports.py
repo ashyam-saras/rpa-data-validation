@@ -274,6 +274,7 @@ def download_actual_report(
 
         cookie, headers = login_and_get_cookie(
             amazon_retail=True,
+            market_place=args.market_place,
             username=args.user_name,
             password=args.password,
             otp_secret=args.otp_secret,
@@ -299,13 +300,13 @@ def download_actual_report(
                 year = end_date_obj.strftime("%Y")
                 month = end_date_obj.strftime("%m")
 
-                destination_blob_name = f"UIReports/AmazonSellingPartner/{client}/{brandname}/{file_prefix}/year={year}/month={month}/{output_file}"
-                # upload_to_gcs(
-                #     local_file_name=output_file,
-                #     local_folder_name=folder_name,
-                #     bucket_name=bucket_name,
-                #     destination_blob_name=destination_blob_name,
-                # )
+                destination_blob_name = f"UIReports/AmazonVendorCentral/{client}/{file_prefix}/brandname={brandname}/year={year}/month={month}/{output_file}"
+                upload_to_gcs(
+                    local_file_name=output_file,
+                    local_folder_name=folder_name,
+                    bucket_name=bucket_name,
+                    destination_blob_name=destination_blob_name,
+                )
             else:
                 logger.error("Failed to download report")
                 return None
